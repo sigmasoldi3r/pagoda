@@ -33,7 +33,7 @@ class ConsoleContext {
     )
   }
   clear() {
-    this.update(null)
+    this.update(<></>)
   }
 }
 

@@ -1,22 +1,5 @@
 {
-  const locals = {}
-  const stack = []
-
-  function resolve(value) {
-    const isPositional = value.match(/^_([0-9]+)$/)
-    if (isPositional) {
-      const [, at] = isPositional
-      const pos = Number(at)
-      const found = stack.find(args => args.length >= pos)
-      if (found) {
-        return found[pos]
-      }
-    }
-    return locals[value]
-  }
-
-  const { ambient } = options
-  const asBoolean = t => t in {
+  const trueBooleanSet = {
     'true': true,
     'yes': true,
     'high': true,
@@ -24,30 +7,15 @@
     'valid': true,
     'ok': true
   }
-  const {
-    Program,
-    Narration,
-    Character
-  } = options.lib
 }
 
 program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
-  if (ambient) {
-    return new Program(statements, locals, resolve)
-  }
   return {
     type: 'program',
-    statements
+    statements,
+    trueBooleanSet
   }
 }
-// DISABLED - Not used at the moment.
-// pragma = '@' target:IDENTIFIER parameters:(' '+ @(IDENTIFIER / string / number))* {
-//   return {
-//     type: 'pragma',
-//     target,
-//     parameters
-//   }
-// }
 
 // --------- STATEMENTS --------- //
 statement
@@ -61,13 +29,6 @@ statement
   / narration
 
 ifCase = 'if' _? expr:expression _? block:block {
-  if (ambient) {
-    return function* If() {
-      if (expr()) {
-        yield* block()
-      }
-    }
-  }
   return {
     type: 'if',
     expr,
@@ -76,15 +37,6 @@ ifCase = 'if' _? expr:expression _? block:block {
 }
 
 section = 'section' _? target:IDENTIFIER _? block:block {
-  if (ambient) {
-    return function section() {
-      locals[target] = function*(...args) {
-        stack.push(args)
-        yield* block()
-        stack.pop()
-      }
-    }
-  }
   return {
     type: 'section',
     target,
@@ -93,15 +45,6 @@ section = 'section' _? target:IDENTIFIER _? block:block {
 }
 
 call = 'call' _? target:name params:(_? 'with' @(' '+ @expression)+)? {
-  if (options.ambient) {
-    return function call() {
-      const resolve = target()
-      if (typeof resolve !== 'function') {
-        throw new Error(`Variable ${target} is not a function!`)
-      }
-      return resolve(...params.map(e => e()))
-    }
-  }
   return {
     type: 'call',
     target,
@@ -110,11 +53,6 @@ call = 'call' _? target:name params:(_? 'with' @(' '+ @expression)+)? {
 }
 
 assignment = 'set' _? target:IDENTIFIER _? 'to' _? value:expression {
-  if (ambient) {
-    return function set() {
-      locals[target] = value?.()
-    }
-  }
   return {
     type: 'assignment',
     target,
@@ -123,16 +61,6 @@ assignment = 'set' _? target:IDENTIFIER _? 'to' _? value:expression {
 }
 
 choice = 'choice' title:(_ @(string / name))? _? '{' options:(_? @choiceCase _?)* _? '}' {
-  if (ambient) {
-    return function* choice() {
-      yield { narration: true, text: title() }
-      for (const { match, then } of options) {
-        yield { choice: true, label: match(), *run() {
-          yield* then()
-        } }
-      }
-    }
-  }
   return {
     type: 'choice',
     options,
@@ -141,11 +69,6 @@ choice = 'choice' title:(_ @(string / name))? _? '{' options:(_? @choiceCase _?)
 }
 
 narration = text:string {
-  if (ambient) {
-    return function dialogue() {
-      return { narration: true, text: text() }
-    }
-  }
   return {
     type: 'narration',
     text
@@ -153,11 +76,6 @@ narration = text:string {
 }
 
 dialogue = actor:(name / string) ' '* text:string {
-  if (ambient) {
-    return function dialogue() {
-      return { narration: true, actor: actor(), text: text() }
-    }
-  }
   return {
     type: 'dialogue',
     actor,
@@ -166,9 +84,6 @@ dialogue = actor:(name / string) ' '* text:string {
 }
 
 returnStatement = 'return' _? value:expression {
-  if (ambient) {
-    return function Return() { return void 0 }
-  }
   return {
     type: 'return',
     value
@@ -199,22 +114,6 @@ atom
   / '(' _? @expression _? ')'
 
 compareExpr = left:addExpr _? operator:COMPARE_OP _? right:compareExpr {
-  if (ambient) {
-    switch (operator) {
-      case '>':
-        return () => left() > right()
-      case '>=':
-        return () => left() >= right()
-      case '<':
-        return () => left() < right()
-      case '<=':
-        return () => left() <= right()
-      case '<>':
-        return () => left() !== right()
-      case '=':
-        return () => left() === right()
-    }
-  }
   return {
     type: 'binary',
     operator,
@@ -224,14 +123,6 @@ compareExpr = left:addExpr _? operator:COMPARE_OP _? right:compareExpr {
 } / addExpr
 
 addExpr = left:mulExpr _? operator:[+-] _? right:addExpr {
-  if (ambient) {
-    switch (operator) {
-      case '+':
-        return () => left() + right()
-      case '-':
-        return () => left() - right()
-    }
-  }
   return {
     type: 'binary',
     operator,
@@ -241,14 +132,6 @@ addExpr = left:mulExpr _? operator:[+-] _? right:addExpr {
 } / mulExpr
 
 mulExpr = left:expExpr _? operator:[*/] _? right:mulExpr {
-  if (ambient) {
-    switch (operator) {
-      case '*':
-        return () => left() * right()
-      case '/':
-        return () => left() / right()
-    }
-  }
   return {
     type: 'binary',
     operator,
@@ -258,9 +141,6 @@ mulExpr = left:expExpr _? operator:[*/] _? right:mulExpr {
 } / expExpr
 
 expExpr = left:unaryExpr _? operator:('^' / '**') _? right:expExpr {
-  if (ambient) {
-    return () => Math.pow(left(), right())
-  }
   return {
     type: 'binary',
     operator,
@@ -271,17 +151,6 @@ expExpr = left:unaryExpr _? operator:('^' / '**') _? right:expExpr {
 
 unaryExpr
   = operator:([!~@'¿+-] / 'not') _? term:atom {
-    if (ambient) {
-      switch (operator) {
-        case '!':
-        case 'not':
-          return () => !term()
-        case '-':
-          return () => -term()
-        case '+':
-          return () => +term()
-      }
-    }
     return {
       type: 'unary',
       mode: 'prefix',
@@ -290,12 +159,6 @@ unaryExpr
     }
   }
   / term:atom _? operator:('exists') {
-    if (ambient) {
-      switch (operator) {
-        case 'exists':
-          return () => term() != null
-      }
-    }
     return {
       type: 'unary',
       mode: 'postfix',
@@ -308,11 +171,6 @@ unaryExpr
 // --------- ATOMS --------- //
 
 block "Program block" = '{' p:program '}' {
-  if (ambient) {
-    return function* block() {
-      yield* p.start()
-    }
-  }
   return {
     type: 'block',
     statements: p.statements
@@ -320,11 +178,6 @@ block "Program block" = '{' p:program '}' {
 }
 
 name "Identifier" = value:IDENTIFIER {
-  if (ambient) {
-    return function reference() {
-      return resolve(value)
-    }
-  }
   return {
     type: 'name',
     value
@@ -332,9 +185,6 @@ name "Identifier" = value:IDENTIFIER {
 }
 
 string = '"' text:(stringRef / stringEmbedExpr / stringText)* '"' {
-  if (ambient) {
-    return function string() { return text.map(s => s()).join('') }
-  }
   return {
     type: 'string',
     text
@@ -346,17 +196,11 @@ stringRef = '$' @name
 stringEmbedExpr = '$(' _? @expression _? ')'
 
 stringText = e:$(!'"' ([^$] / '$$'))+ {
-  if (ambient) {
-    return () => e
-  }
   return e
 }
 
 number = n:$([0-9]+('.'[0-9]+)?) {
   const value = Number(n)
-  if (ambient) {
-    return function number() { return value }
-  }
   return {
     type: 'number',
     value
@@ -364,14 +208,7 @@ number = n:$([0-9]+('.'[0-9]+)?) {
 }
 
 boolean = b:BOOLEAN {
-  const value = asBoolean(b)
-  if (ambient) {
-    if (value) {
-      return function True() { return true }
-    } else {
-      return function False() { return false }
-    }
-  }
+  const value = b in trueBooleanSet
   return {
     type: 'boolean',
     value
@@ -379,9 +216,6 @@ boolean = b:BOOLEAN {
 }
 
 nothing = value:('nothing' / '()' / 'void' / 'nil' / 'null' / 'never' / 'emtpy' / 'invalid') {
-  if (ambient) {
-    return function nothing() { return null }
-  }
   return {
     type: 'unit'
   }

@@ -59,10 +59,10 @@ export default function LoadRom() {
     e.preventDefault()
     e.stopPropagation()
     const input = inputRef.current
-    const file = input.files.item(0)
-    log.println(`Loading ${file.name}`)
+    const file = input?.files?.item(0)
+    log.println(`Loading ${file?.name}`)
 
-    const src = await file.text()
+    const src = await file?.text()
     log.println(`Parsing sources...`)
   }
   return (
@@ -72,7 +72,7 @@ export default function LoadRom() {
       <input
         onChange={handleFile}
         style={{ display: 'none' }}
-        ref={inputRef}
+        ref={inputRef as any}
         type="file"
       />
       <Console context={log} />

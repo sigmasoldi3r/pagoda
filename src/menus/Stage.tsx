@@ -15,27 +15,14 @@ let running = false
 
 export default function Stage({ rom }: { rom: string }) {
   const log = useConsole()
-  async function walk(walkable: any) {
-    for (const s of walkable) {
-      await sleep(500)
-      const result = typeof s === 'function' ? s() : s
-      if (result == null) {
-        continue
-      } else if (result.narration) {
-        if (result.actor) {
-          log.println(`${result.actor}: ${result.text}`)
-        } else {
-          log.println(result.text)
-        }
-      } else if (result.choice) {
-        log.println(
-          <button onClick={() => walk(result.run())}>{result.label}</button>
-        )
-      } else {
-        await walk(result)
-      }
+  const rt = new lib.Runtime(async stmt => {
+    switch (stmt.type) {
+      case 'narration':
+      case 'dialogue':
+        log.println(rt.getText(stmt))
     }
-  }
+    return stmt
+  })
   async function loadRom() {
     if (running) return
     running = true
@@ -44,7 +31,7 @@ export default function Stage({ rom }: { rom: string }) {
     const result = loadProgram(rom)
     if (result.success()) {
       log.println('Done!')
-      await walk(result.value.start())
+      rt.start(result.value)
     } else {
       log.println(
         <div style={{ color: 'red' }}>

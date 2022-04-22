@@ -1,0 +1,396 @@
+{
+  const locals = {}
+  const stack = []
+
+  function resolve(value) {
+    const isPositional = value.match(/^_([0-9]+)$/)
+    if (isPositional) {
+      const [, at] = isPositional
+      const pos = Number(at)
+      const found = stack.find(args => args.length >= pos)
+      if (found) {
+        return found[pos]
+      }
+    }
+    return locals[value]
+  }
+
+  const { ambient } = options
+  const asBoolean = t => t in {
+    'true': true,
+    'yes': true,
+    'high': true,
+    'on': true,
+    'valid': true,
+    'ok': true
+  }
+  const {
+    Program,
+    Narration,
+    Character
+  } = options.lib
+}
+
+program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
+  if (ambient) {
+    return new Program(statements, locals, resolve)
+  }
+  return {
+    type: 'program',
+    statements
+  }
+}
+// DISABLED - Not used at the moment.
+// pragma = '@' target:IDENTIFIER parameters:(' '+ @(IDENTIFIER / string / number))* {
+//   return {
+//     type: 'pragma',
+//     target,
+//     parameters
+//   }
+// }
+
+// --------- STATEMENTS --------- //
+statement
+  = section
+  / ifCase
+  / returnStatement
+  / assignment
+  / call
+  / choice
+  / dialogue
+  / narration
+
+ifCase = 'if' _? expr:expression _? block:block {
+  if (ambient) {
+    return function* If() {
+      if (expr()) {
+        yield* block()
+      }
+    }
+  }
+  return {
+    type: 'if',
+    expr,
+    block
+  }
+}
+
+section = 'section' _? target:IDENTIFIER _? block:block {
+  if (ambient) {
+    return function section() {
+      locals[target] = function*(...args) {
+        stack.push(args)
+        yield* block()
+        stack.pop()
+      }
+    }
+  }
+  return {
+    type: 'section',
+    target,
+    block
+  }
+}
+
+call = 'call' _? target:name params:(_? 'with' @(' '+ @expression)+)? {
+  if (options.ambient) {
+    return function call() {
+      const resolve = target()
+      if (typeof resolve !== 'function') {
+        throw new Error(`Variable ${target} is not a function!`)
+      }
+      return resolve(...params.map(e => e()))
+    }
+  }
+  return {
+    type: 'call',
+    target,
+    params
+  }
+}
+
+assignment = 'set' _? target:IDENTIFIER _? 'to' _? value:expression {
+  if (ambient) {
+    return function set() {
+      locals[target] = value?.()
+    }
+  }
+  return {
+    type: 'assignment',
+    target,
+    value
+  }
+}
+
+choice = 'choice' title:(_ @(string / name))? _? '{' options:(_? @choiceCase _?)* _? '}' {
+  if (ambient) {
+    return function* choice() {
+      yield { narration: true, text: title() }
+      for (const { match, then } of options) {
+        yield { choice: true, label: match(), *run() {
+          yield* then()
+        } }
+      }
+    }
+  }
+  return {
+    type: 'choice',
+    options,
+    title
+  }
+}
+
+narration = text:string {
+  if (ambient) {
+    return function dialogue() {
+      return { narration: true, text: text() }
+    }
+  }
+  return {
+    type: 'narration',
+    text
+  }
+}
+
+dialogue = actor:(name / string) ' '* text:string {
+  if (ambient) {
+    return function dialogue() {
+      return { narration: true, actor: actor(), text: text() }
+    }
+  }
+  return {
+    type: 'dialogue',
+    actor,
+    text
+  }
+}
+
+returnStatement = 'return' _? value:expression {
+  if (ambient) {
+    return function Return() { return void 0 }
+  }
+  return {
+    type: 'return',
+    value
+  }
+}
+
+// -- NON-SHARED ATOMS -- //
+
+choiceCase = match:(string / name) _? then:block {
+  return {
+    type: 'case',
+    match,
+    then
+  }
+}
+
+
+// --------- EXPRESSIONS --------- //
+
+expression = compareExpr
+
+atom
+  = call
+  / choice
+  / string
+  / number
+  / name
+  / '(' _? @expression _? ')'
+
+compareExpr = left:addExpr _? operator:COMPARE_OP _? right:compareExpr {
+  if (ambient) {
+    switch (operator) {
+      case '>':
+        return () => left() > right()
+      case '>=':
+        return () => left() >= right()
+      case '<':
+        return () => left() < right()
+      case '<=':
+        return () => left() <= right()
+      case '<>':
+        return () => left() !== right()
+      case '=':
+        return () => left() === right()
+    }
+  }
+  return {
+    type: 'binary',
+    operator,
+    left,
+    right
+  }
+} / addExpr
+
+addExpr = left:mulExpr _? operator:[+-] _? right:addExpr {
+  if (ambient) {
+    switch (operator) {
+      case '+':
+        return () => left() + right()
+      case '-':
+        return () => left() - right()
+    }
+  }
+  return {
+    type: 'binary',
+    operator,
+    left,
+    right
+  }
+} / mulExpr
+
+mulExpr = left:expExpr _? operator:[*/] _? right:mulExpr {
+  if (ambient) {
+    switch (operator) {
+      case '*':
+        return () => left() * right()
+      case '/':
+        return () => left() / right()
+    }
+  }
+  return {
+    type: 'binary',
+    operator,
+    left,
+    right
+  }
+} / expExpr
+
+expExpr = left:unaryExpr _? operator:('^' / '**') _? right:expExpr {
+  if (ambient) {
+    return () => Math.pow(left(), right())
+  }
+  return {
+    type: 'binary',
+    operator,
+    left,
+    right
+  }
+} / unaryExpr
+
+unaryExpr
+  = operator:([!~@'¿+-] / 'not') _? term:atom {
+    if (ambient) {
+      switch (operator) {
+        case '!':
+        case 'not':
+          return () => !term()
+        case '-':
+          return () => -term()
+        case '+':
+          return () => +term()
+      }
+    }
+    return {
+      type: 'unary',
+      mode: 'prefix',
+      operator,
+      term
+    }
+  }
+  / term:atom _? operator:('exists') {
+    if (ambient) {
+      switch (operator) {
+        case 'exists':
+          return () => term() != null
+      }
+    }
+    return {
+      type: 'unary',
+      mode: 'postfix',
+      operator,
+      term
+    }
+  }
+  / atom
+
+// --------- ATOMS --------- //
+
+block "Program block" = '{' p:program '}' {
+  if (ambient) {
+    return function* block() {
+      yield* p.start()
+    }
+  }
+  return {
+    type: 'block',
+    statements: p.statements
+  }
+}
+
+name "Identifier" = value:IDENTIFIER {
+  if (ambient) {
+    return function reference() {
+      return resolve(value)
+    }
+  }
+  return {
+    type: 'name',
+    value
+  }
+}
+
+string = '"' text:(stringRef / stringEmbedExpr / stringText)* '"' {
+  if (ambient) {
+    return function string() { return text.map(s => s()).join('') }
+  }
+  return {
+    type: 'string',
+    text
+  }
+}
+
+stringRef = '$' @name
+
+stringEmbedExpr = '$(' _? @expression _? ')'
+
+stringText = e:$(!'"' ([^$] / '$$'))+ {
+  if (ambient) {
+    return () => e
+  }
+  return e
+}
+
+number = n:$([0-9]+('.'[0-9]+)?) {
+  const value = Number(n)
+  if (ambient) {
+    return function number() { return value }
+  }
+  return {
+    type: 'number',
+    value
+  }
+}
+
+boolean = b:BOOLEAN {
+  const value = asBoolean(b)
+  if (ambient) {
+    if (value) {
+      return function True() { return true }
+    } else {
+      return function False() { return false }
+    }
+  }
+  return {
+    type: 'boolean',
+    value
+  }
+}
+
+nothing = value:('nothing' / '()' / 'void' / 'nil' / 'null' / 'never' / 'emtpy' / 'invalid') {
+  if (ambient) {
+    return function nothing() { return null }
+  }
+  return {
+    type: 'unit'
+  }
+}
+
+BOOLEAN = 'true' / 'false' / 'high' / 'low' / 'yes' / 'no' / 'on' / 'off'
+IDENTIFIER = $([A-Za-z_][A-Za-z0-9_]*)
+NL = '\r\n' / '\n' / '\r'
+COMMENT = '#' (!NL .)* NL
+BLANK = [ \t\n\r] / COMMENT
+_ = BLANK+
+COMPARE_OP = '>=' / '>' / '<=' / '<>' / '<' / '=' / 'is' / 'isnt' / 'isn\'t' / 'is not'

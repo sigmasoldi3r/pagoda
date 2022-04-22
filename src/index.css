@@ -42,6 +42,11 @@ button {
   border-radius: 0;
 }
 
+.choice.disabled {
+  background-color: lightgray;
+  color: gray;
+}
+
 /* Fonts */
 @font-face {
   font-family: 'Press Start';

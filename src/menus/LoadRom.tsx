@@ -11,7 +11,7 @@ set such to "also those kind of "
 
 set goUp to "Go $(1+2) uphill"
 
-set elieen to "Elieen"
+character "Elieen" as elieen
 
 if elieen exists {
   elieen "Oh... I'm alive!"

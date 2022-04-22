@@ -7,6 +7,12 @@ export class Character {
   constructor(readonly name: string, readonly color = 0xffffff) {}
 }
 
+const nothing = new (class Nothing {
+  toString() {
+    return '<nothing>'
+  }
+})()
+
 export type Value = any
 
 /**
@@ -15,7 +21,9 @@ export type Value = any
 export class Runtime {
   private parent: Runtime | null = null
   locals: Record<string, Value> = {}
-  constructor(readonly listener: (input: Statement) => Promise<Statement>) {}
+  constructor(
+    readonly listener: (this: Runtime, input: Statement) => Promise<Statement>
+  ) {}
 
   /**
    * Spawns a children runtime that has visibility of
@@ -27,43 +35,59 @@ export class Runtime {
     return rt
   }
 
-  private async assignment(assign: Assign) {}
+  private async assignment(assign: Assign) {
+    this.locals[assign.target] = await this.solve(assign.value)
+  }
 
   private async solveBinary(expr: Expression): Promise<Value> {
     if (expr.type === 'binary') {
+      const left = await this.solve(expr.left)
+      const right = await this.solve(expr.right)
       switch (expr.operator) {
         case '+':
-          return (await this.solve(expr.left)) + (await this.solve(expr.right))
+          return left + right
         case '-':
-          return (await this.solve(expr.left)) - (await this.solve(expr.right))
+          return left - right
         case '*':
-          return (await this.solve(expr.left)) * (await this.solve(expr.right))
+          return left * right
         case '/':
-          return (await this.solve(expr.left)) / (await this.solve(expr.right))
+          return left / right
         case '>':
-          return (await this.solve(expr.left)) > (await this.solve(expr.right))
+          return left > right
         case '<':
-          return (await this.solve(expr.left)) < (await this.solve(expr.right))
+          return left < right
         case '>=':
-          return (await this.solve(expr.left)) >= (await this.solve(expr.right))
+          return left >= right
         case '<=':
-          return (await this.solve(expr.left)) <= (await this.solve(expr.right))
+          return left <= right
         case '<>':
-          return (
-            (await this.solve(expr.left)) !== (await this.solve(expr.right))
-          )
+          return left !== right
         case '=':
-          return (
-            (await this.solve(expr.left)) === (await this.solve(expr.right))
-          )
+          return left === right
         case '**':
-          return Math.pow(
-            await this.solve(expr.left),
-            await this.solve(expr.right)
-          )
+          return Math.pow(left, right)
       }
     }
-    return null
+    return nothing
+  }
+
+  // Solve unary expressions
+  private async solveUnary(expr: Expression) {
+    if (expr.type === 'unary') {
+      const term = await this.solve(expr.term)
+      switch (expr.operator) {
+        case 'exists':
+          return term != null
+        case 'not':
+        case '!':
+          return !term
+        case '-':
+          return -term
+        case '+':
+          return +term
+      }
+    }
+    return nothing
   }
 
   // Solve the call procedure to a function (AKA a "section")
@@ -79,8 +103,7 @@ export class Runtime {
         `Attempting to call a non-function value "${expr.target.value}"`
       )
     }
-    const args = expr.params.map(p => this.solve(p))
-    return await fn(...args)
+    return await fn(...expr.params)
   }
 
   // Attempts to retrieve a local expression or a parent one.
@@ -101,12 +124,18 @@ export class Runtime {
     switch (expr.type) {
       case 'binary':
         return await this.solveBinary(expr)
+      case 'unary':
+        return await this.solveUnary(expr)
       case 'call':
         return await this.solveCall(expr)
       case 'name':
         return await this.solveReference(expr)
+      case 'string':
+        return await this.getText(expr)
+      case 'number':
+        return expr.value
     }
-    return null
+    return nothing
   }
 
   /**
@@ -115,12 +144,12 @@ export class Runtime {
    * points to, in case that is valid.
    * Throws if pointing to something other than a character.
    */
-  getActor(target: Dialogue): Character {
+  async getActor(target: Dialogue): Promise<Character> {
     if (target.actor.type === 'string') {
-      const value = this.getText(target.actor)
+      const value = await this.getText(target.actor)
       return new Character(value)
     }
-    const char = this.solve(target.actor)
+    const char = await this.solve(target.actor)
     if (!(char instanceof Character)) {
       throw new Error(
         `Target actor "${target.actor.value}" is not a character.`
@@ -129,39 +158,77 @@ export class Runtime {
     return char
   }
 
+  private async collect(text: (string | Expression)[]): Promise<string> {
+    const chunks: string[] = []
+    for (const chunk of text) {
+      if (typeof chunk === 'string') {
+        chunks.push(chunk)
+      } else {
+        chunks.push(await this.solve(chunk))
+      }
+    }
+    return chunks.join('')
+  }
+
   /** Resolves the text of the given string-like expression. */
-  getText(target: Narration | Dialogue | Str): string {
+  async getText(target: Narration | Dialogue | Str): Promise<string> {
     switch (target.type) {
       case 'dialogue':
       case 'narration':
-        return this.getText(target.text)
+        return await this.getText(target.text)
       case 'string':
-        return target.text
-          .map(s => {
-            if (typeof s === 'string') {
-              return s
-            } else {
-              return String(this.solve(s))
-            }
-          })
-          .join('')
+        return await this.collect(target.text)
     }
   }
 
-  // Consume many statements, awaits and emits events.
-  private async consumeStatements(statements: Statement[]) {
-    for (const stmt of statements) {
-      const result = await this.listener(stmt)
-      switch (result.type) {
-        case 'assignment':
-          await this.assignment(result)
+  // "if" type, control flow statement.
+  private async branching(stmt: If): Promise<void> {
+    const result = await this.solve(stmt.expr)
+    if (result) {
+      await this.start(stmt.block)
+    }
+  }
+
+  // A character declaration, which assigns and creates the character.
+  private async declareCharacter(char: CharacterDeclaration): Promise<void> {
+    this.locals[char.target] = new Character(await this.solve(char.name))
+  }
+
+  // Declares a new section and stores it as a local.
+  private async declareSection(sect: Section): Promise<void> {
+    this.locals[sect.target] = async (...args) => {
+      // Create a local runtime.
+      const local = this.child()
+      // Store arguments as top-level locals.
+      for (let i = 0; i < args.length; i++) {
+        local.locals[`_${i}`] = await local.solve(args[i])
       }
+      return await local.start(sect.block)
     }
   }
 
   /** Starts walking the program tree. */
-  async start(program: Program) {
-    return await this.consumeStatements(program.statements)
+  async start(block: Program | Block): Promise<void> {
+    for (const stmt of block.statements) {
+      const result = await this.listener(stmt)
+      switch (result.type) {
+        case 'assignment':
+          await this.assignment(result)
+          break
+        case 'character':
+          await this.declareCharacter(result)
+          break
+        case 'if':
+          await this.branching(result)
+          break
+        case 'section':
+          await this.declareSection(result)
+          break
+        case 'call':
+          await this.solve(result)
+          break
+      }
+    }
   }
 }
 
@@ -183,6 +250,12 @@ export type Statement =
   | Choice
   | Dialogue
   | Narration
+  | CharacterDeclaration
+
+export interface CharacterDeclaration extends Node<'character'> {
+  target: IDENTIFIER
+  name: Str
+}
 
 export interface If extends Node<'if'> {
   expr: Expression

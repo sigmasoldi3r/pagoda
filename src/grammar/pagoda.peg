@@ -21,12 +21,21 @@ program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
 statement
   = section
   / ifCase
+  / character
   / returnStatement
   / assignment
   / call
   / choice
   / dialogue
   / narration
+
+character = 'character' _? name:string _? 'as' _? target:IDENTIFIER {
+  return {
+    type: 'character',
+    target,
+    name
+  }
+}
 
 ifCase = 'if' _? expr:expression _? block:block {
   return {
@@ -110,6 +119,8 @@ atom
   / choice
   / string
   / number
+  / nothing
+  / boolean
   / name
   / '(' _? @expression _? ')'
 
@@ -150,7 +161,7 @@ expExpr = left:unaryExpr _? operator:('^' / '**') _? right:expExpr {
 } / unaryExpr
 
 unaryExpr
-  = operator:([!~@'¿+-] / 'not') _? term:atom {
+  = operator:([!~@'¿+-] / (@'not' ' ')) _? term:atom {
     return {
       type: 'unary',
       mode: 'prefix',

@@ -1,10 +1,21 @@
 import './genAssetManifest'
 import { CracoConfig } from '@craco/craco'
 import path from 'path'
+import webpack from 'webpack'
 
 export default {
   webpack: {
     configure: {
+      plugins: [
+        new webpack.ProvidePlugin({
+          Buffer: ['buffer', 'Buffer'],
+        }),
+      ],
+      resolve: {
+        fallback: {
+          buffer: require.resolve('buffer/'),
+        },
+      },
       module: {
         rules: [
           {

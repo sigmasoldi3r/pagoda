@@ -20,13 +20,17 @@
     "@types/craco__craco": "^6.4.0",
     "@types/jest": "^26.0.15",
     "@types/node": "^12.0.0",
+    "@types/pako": "^1.0.3",
     "@types/react": "^16.9.53",
     "@types/react-dom": "^16.9.8",
+    "buffer": "^6.0.3",
     "gh-pages": "^3.2.3",
     "peggy": "^1.2.0",
     "typescript": "^4.0.3"
   },
   "dependencies": {
+    "@octantis/option": "^1.2.0",
+    "pako": "^2.0.4",
     "pixi.js": "^6.3.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",

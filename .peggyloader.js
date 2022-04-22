@@ -15,7 +15,6 @@ export default function (source) {
     plugins: [],
     trace: false,
   }
-  this.hot = true
   return peggy.generate(source.toString(), options)
 }
 

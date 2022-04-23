@@ -14,6 +14,10 @@ interface ChoiceProps {
 }
 
 function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
+  const [open, setOpen] = useState(true)
+  if (!open) {
+    return null
+  }
   return (
     <div
       style={{
@@ -30,6 +34,7 @@ function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
           <button
             key={`${title}_ch_${i}`}
             onClick={async e => {
+              setOpen(false)
               e.stopPropagation()
               e.preventDefault()
               await rt.start(opt.then)
@@ -47,6 +52,7 @@ function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
 
 const events = new EventEmitter()
 
+let choices = 0
 let once = false
 export default function Stage({ rom }: { rom: Rom }) {
   const goTo = useScreen()
@@ -97,6 +103,7 @@ export default function Stage({ rom }: { rom: Rom }) {
             }
             setChoice(
               <ChoiceMenu
+                key={`__choices_${choices++}`}
                 title={title}
                 def={stmt}
                 rt={this}
@@ -105,6 +112,7 @@ export default function Stage({ rom }: { rom: Rom }) {
               />
             )
           })
+          console.log('Donnie')
           setChoice(null)
           break
       }

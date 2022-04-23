@@ -30,9 +30,11 @@ section riverActions {
   choice "Actions" {
     "Go up the river" {
       call walk
+      "Not ready"
     }
     "Go down the river" {
       call walk
+      "Not ready"
     }
     "Gather" {
       "You gather some food."

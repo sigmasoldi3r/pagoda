@@ -1,10 +1,10 @@
-import LoadRom from './menus/LoadRom'
 import Screen from './components/Screen'
+import MainMenu from './menus/MainMenu'
 
 function App() {
   return (
     <Screen>
-      <LoadRom />
+      <MainMenu />
     </Screen>
   )
 }

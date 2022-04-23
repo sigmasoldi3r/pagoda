@@ -20,6 +20,8 @@ body,
   max-height: 100vh;
 }
 
+/* Animations */
+
 @keyframes pulsating {
   0% {
     opacity: 1;
@@ -67,6 +69,30 @@ button {
 .choice.disabled {
   background-color: lightgray;
   color: gray;
+}
+
+.icon {
+  display: inline;
+  width: 0;
+  height: 0;
+  position: relative;
+}
+.icon > img {
+  position: absolute;
+  width: auto;
+  height: auto;
+  bottom: -50%;
+  padding-left: 0.1rem;
+  padding-right: 0.1rem;
+  image-rendering: pixelated;
+}
+
+/* Elements */
+.btn {
+  padding: 1rem;
+  padding-right: 2rem;
+  padding-left: 2rem;
+  margin: 0.2rem;
 }
 
 /* Fonts */

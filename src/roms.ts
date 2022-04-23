@@ -11,7 +11,7 @@ set hunger to 0
 set food to 0
 
 section walk {
-  set hunger to hunger + 1
+  add -1 to hunger
 }
 
 section riverActions {
@@ -20,10 +20,10 @@ section riverActions {
     return 0
   }
   if hunger >= 10 {
-    set hp to hp - 1
+    add -1 to hp
   }
   clear
-  "You're standing next to a river"
+  "You're standing next to a river."
   " - $food of food"
   " - $hunger of hunger"
   " - $hp of health"
@@ -38,7 +38,7 @@ section riverActions {
     }
     "Gather" {
       "You gather some food."
-      set food to food + 1
+      add 1 to food
       "Your inventory contains now $food of food."
       call riverActions
     }
@@ -50,8 +50,8 @@ section riverActions {
         "You're not hungry right now..."
       }
       if food > 0 and hunger > 0 {
-        set food to food - 1
-        set hunger to hunger - 1
+        add -1 to hunger
+        add -1 to food
         "You ate some food..."
       }
       wait

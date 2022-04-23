@@ -7,6 +7,7 @@
     'valid': true,
     'ok': true
   }
+  const makeBinary = (left, operator, right) => ({ type: 'binary', left, operator, right })
 }
 
 program = statements:(_? @(statement /*/ pragma*/) _)* _? {
@@ -62,13 +63,20 @@ call = 'call' _? target:name params:(_? 'with' @(' '+ @expression)+)? {
   }
 }
 
-assignment = 'set' _? target:IDENTIFIER _? 'to' _? value:expression {
-  return {
-    type: 'assignment',
-    target,
-    value
+assignment
+  = 'set' _ target:IDENTIFIER _ 'to' _? value:expression {
+    return {
+      type: 'assignment',
+      target,
+      value
+    }
+  } / 'add' _? value:expression _? 'to' _ target:IDENTIFIER {
+    return {
+      type: 'assignment',
+      target,
+      value: makeBinary({ type: 'name', value: target }, '+', value)
+    }
   }
-}
 
 choice = 'choice' title:(_ @(string / name))? _? '{' options:(_? @choiceCase _?)* _? '}' {
   return {
@@ -100,7 +108,7 @@ returnStatement = 'return' _? value:expression {
   }
 }
 
-monoid = type:('clear' / 'end' / 'wait') {
+monoid = type:('clear' / 'end' / 'wait' / 'repeat') {
   return {
     type
   }
@@ -131,48 +139,23 @@ atom
   / '(' _? @expression _? ')'
 
 logicExpr = left:compareExpr _ operator:('and'/'or') _ right:logicExpr {
-  return {
-    type: 'binary',
-    operator,
-    left,
-    right
-  }
+  return makeBinary(left, operator, right)
 } / compareExpr
 
 compareExpr = left:addExpr _? operator:COMPARE_OP _? right:compareExpr {
-  return {
-    type: 'binary',
-    operator,
-    left,
-    right
-  }
+  return makeBinary(left, operator, right)
 } / addExpr
 
 addExpr = left:mulExpr _? operator:[+-] _? right:addExpr {
-  return {
-    type: 'binary',
-    operator,
-    left,
-    right
-  }
+  return makeBinary(left, operator, right)
 } / mulExpr
 
 mulExpr = left:expExpr _? operator:[*/] _? right:mulExpr {
-  return {
-    type: 'binary',
-    operator,
-    left,
-    right
-  }
+  return makeBinary(left, operator, right)
 } / expExpr
 
 expExpr = left:unaryExpr _? operator:('^' / '**') _? right:expExpr {
-  return {
-    type: 'binary',
-    operator,
-    left,
-    right
-  }
+  return makeBinary(left, operator, right)
 } / unaryExpr
 
 unaryExpr
@@ -184,7 +167,7 @@ unaryExpr
       term
     }
   }
-  / term:atom _? operator:('exists') {
+  / term:propertyAccess _? operator:('exists') {
     return {
       type: 'unary',
       mode: 'postfix',
@@ -192,7 +175,11 @@ unaryExpr
       term
     }
   }
-  / atom
+  / propertyAccess
+
+propertyAccess "Property access" = left:atom _? "'s" _ right:propertyAccess {
+  return makeBinary(left, operator, right)
+} / atom
 
 // --------- ATOMS --------- //
 

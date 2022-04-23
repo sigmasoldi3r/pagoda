@@ -3,7 +3,6 @@ import Console, { useConsole } from '../components/Console'
 import { useScreen } from '../components/Screen'
 import { sleep } from '../lib/Coroutines'
 import { Rom } from '../lib/storage/Rom'
-import './LoadRom.css'
 import Stage from './Stage'
 import * as roms from '../roms'
 

@@ -1,19 +1,19 @@
 {
   "files": {
-    "main.css": "https://sigmasoldi3r.github.io/pagoda/static/css/main.c2576f96.css",
-    "main.js": "https://sigmasoldi3r.github.io/pagoda/static/js/main.e80f90d5.js",
+    "main.css": "https://sigmasoldi3r.github.io/pagoda/static/css/main.447a1275.css",
+    "main.js": "https://sigmasoldi3r.github.io/pagoda/static/js/main.94c1fdec.js",
     "static/js/377.902921db.chunk.js": "https://sigmasoldi3r.github.io/pagoda/static/js/377.902921db.chunk.js",
     "service-worker.js": "https://sigmasoldi3r.github.io/pagoda/service-worker.js",
     "static/media/Pixel.ttf": "https://sigmasoldi3r.github.io/pagoda/static/media/Pixel.133ca106f990709dc70f.ttf",
     "static/media/prstart.ttf": "https://sigmasoldi3r.github.io/pagoda/static/media/prstart.f22a5be077b22a25731a.ttf",
     "static/media/dpcomic.ttf": "https://sigmasoldi3r.github.io/pagoda/static/media/dpcomic.d7850454ee2ba505e533.ttf",
     "index.html": "https://sigmasoldi3r.github.io/pagoda/index.html",
-    "main.c2576f96.css.map": "https://sigmasoldi3r.github.io/pagoda/static/css/main.c2576f96.css.map",
-    "main.e80f90d5.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/main.e80f90d5.js.map",
+    "main.447a1275.css.map": "https://sigmasoldi3r.github.io/pagoda/static/css/main.447a1275.css.map",
+    "main.94c1fdec.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/main.94c1fdec.js.map",
     "377.902921db.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/377.902921db.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.c2576f96.css",
-    "static/js/main.e80f90d5.js"
+    "static/css/main.447a1275.css",
+    "static/js/main.94c1fdec.js"
   ]
 }

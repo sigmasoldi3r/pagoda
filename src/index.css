@@ -57,15 +57,9 @@ code {
 #root * {
   font-family: 'Press Start';
 }
-#root code,
-#root button {
+#root code {
   line-height: 1.2rem;
 }
-
-button {
-  border-radius: 0;
-}
-
 .choice.disabled {
   background-color: lightgray;
   color: gray;
@@ -73,11 +67,12 @@ button {
 
 .icon {
   display: inline;
-  width: 0;
+  min-width: 32px;
   height: 0;
   position: relative;
 }
 .icon > img {
+  left: -50%;
   position: absolute;
   width: auto;
   height: auto;
@@ -93,6 +88,9 @@ button {
   padding-right: 2rem;
   padding-left: 2rem;
   margin: 0.2rem;
+  line-height: 1.2rem;
+  border-radius: 0;
+  text-align: left;
 }
 
 /* Fonts */

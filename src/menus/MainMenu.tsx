@@ -1,10 +1,23 @@
 import Button from '../components/Button'
-import diskette from '../diskette.png'
+import diskette from '../icons/diskette.png'
+import folder from '../icons/folder.png'
+import cog from '../icons/cog_wheel.png'
+import newPackage from '../icons/new_package.png'
+import pagodaLogo from '../logo.png'
 
-function Icon({ src }: { src?: string }) {
+function Icon({
+  src,
+  style,
+  imgStyle,
+}: {
+  imgStyle?: React.CSSProperties
+  style?: React.CSSProperties
+  src?: string
+}) {
   return (
-    <div className="icon">
-      <img src={src} alt={`${src} Icon`} />
+    <div className="icon" style={style}>
+      &nbsp;
+      <img src={src} alt={`${src} Icon`} style={imgStyle} />
     </div>
   )
 }
@@ -14,19 +27,40 @@ export default function MainMenu() {
   return (
     <div
       style={{
-        display: 'flex',
-        flexFlow: 'column',
-        alignContent: 'center',
-        justifyContent: 'center',
         height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
       }}
     >
-      <Button>Open a ROM </Button>
-      <Button>
-        Import a ROM file <Icon src={diskette} />
-      </Button>
-      <Button>Start a new project</Button>
-      <Button>Options</Button>
+      <div
+        style={{
+          display: 'flex',
+          flexFlow: 'column',
+          alignItems: 'stretch',
+          justifyContent: 'center',
+          height: '100%',
+        }}
+      >
+        <div style={{ textAlign: 'center' }}>
+          <Icon
+            imgStyle={{ left: 'calc(-32px + 16px/2 - 1px)' }}
+            src={pagodaLogo}
+          />
+          <h1>Pagoda Engine</h1>
+        </div>
+        <Button>
+          <Icon src={folder} /> &nbsp;Open a ROM
+        </Button>
+        <Button>
+          <Icon src={diskette} /> &nbsp;Import a ROM file
+        </Button>
+        <Button>
+          <Icon src={newPackage} /> &nbsp;Create a new ROM
+        </Button>
+        <Button>
+          <Icon src={cog} /> &nbsp;Options
+        </Button>
+      </div>
     </div>
   )
 }

@@ -4,26 +4,19 @@ import folder from '../icons/folder.png'
 import cog from '../icons/cog_wheel.png'
 import newPackage from '../icons/new_package.png'
 import pagodaLogo from '../logo.png'
-
-function Icon({
-  src,
-  style,
-  imgStyle,
-}: {
-  imgStyle?: React.CSSProperties
-  style?: React.CSSProperties
-  src?: string
-}) {
-  return (
-    <div className="icon" style={style}>
-      &nbsp;
-      <img src={src} alt={`${src} Icon`} style={imgStyle} />
-    </div>
-  )
-}
+import Icon from '../components/Icon'
+import { useScreen } from '../components/Screen'
+import RomList from './RomList'
 
 // Main menu component.
 export default function MainMenu() {
+  const go = useScreen()
+  function openRom() {
+    go(<RomList />)
+  }
+  function importRom() {}
+  function createRom() {}
+  function goToOptions() {}
   return (
     <div
       style={{
@@ -48,16 +41,16 @@ export default function MainMenu() {
           />
           <h1>Pagoda Engine</h1>
         </div>
-        <Button>
+        <Button onClick={openRom}>
           <Icon src={folder} /> &nbsp;Open a ROM
         </Button>
-        <Button>
+        <Button onClick={importRom}>
           <Icon src={diskette} /> &nbsp;Import a ROM file
         </Button>
-        <Button>
+        <Button onClick={createRom}>
           <Icon src={newPackage} /> &nbsp;Create a new ROM
         </Button>
-        <Button>
+        <Button onClick={goToOptions}>
           <Icon src={cog} /> &nbsp;Options
         </Button>
       </div>

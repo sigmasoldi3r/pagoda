@@ -1,5 +1,6 @@
 import React from 'react'
 import './index.css'
+import './reset.css'
 import App from './App'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import reportWebVitals from './reportWebVitals'

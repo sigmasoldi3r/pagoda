@@ -10,7 +10,9 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "publish": "yarn deploy",
+    "prepublish": "yarn build"
   },
   "devDependencies": {
     "@craco/craco": "^6.4.3",

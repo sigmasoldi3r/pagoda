@@ -75,11 +75,21 @@ code {
   left: -50%;
   position: absolute;
   width: auto;
+  max-width: initial;
   height: auto;
   bottom: -50%;
   padding-left: 0.1rem;
   padding-right: 0.1rem;
   image-rendering: pixelated;
+}
+
+/* Semantic */
+.wide {
+  width: 100%;
+}
+
+.center {
+  text-align: center;
 }
 
 /* Elements */

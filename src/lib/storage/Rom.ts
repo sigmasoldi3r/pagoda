@@ -58,7 +58,7 @@ export class Rom {
       if (file == null) {
         throw new Error(`No file named ${file}`)
       }
-      return parse<lib.Program>(file)
+      return parse<lib.Program>(file, { grammarSource: name })
     })
   }
 

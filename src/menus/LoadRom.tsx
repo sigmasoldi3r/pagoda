@@ -5,6 +5,7 @@ import { sleep } from '../lib/Coroutines'
 import { Rom } from '../lib/storage/Rom'
 import './LoadRom.css'
 import Stage from './Stage'
+import * as roms from '../roms'
 
 export default function LoadRom() {
   const log = useConsole()
@@ -55,49 +56,20 @@ export default function LoadRom() {
           e.stopPropagation()
           e.preventDefault()
           console.log('Dumping...')
-          const rom = new Rom()
-          rom.baseURL = 'http://localhost:3000'
-          rom.scripts['init.pag'] = `set vars to "Variables"
-        set such to "also those kind of "
-        "Test $vars and $(such + "things")"
-        
-        set goUp to "Go $(1+2) uphill"
-        
-        character "Elieen" as elieen
-        
-        if elieen exists {
-          elieen "Oh... I'm alive!"
-        }
-        
-        "The player sees a mountain"
-        
-        section die {
-          "So the player dies: $_0"
-          if _1 exists {
-            "Also, $_1..."
-          }
-        }
-        
-        choice "What to do now?" {
-          goUp {
-            "Player decides to go uphills..."
-            call die with "bad ending"
-          }
-          "go down" {
-            "Player does (???)"
-            call die with "bad ending" "the world ends"
-          }
-          "stay" {
-            "A horny naga comes and seduces you"
-            "Now you're happily married"
-          }
-        }
-        
-        "This is the end."`
-          rom.downloadAsFile()
+          roms.testing.downloadAsFile()
         }}
       >
         Dump sample
+      </button>
+      <button
+        onClick={e => {
+          e.stopPropagation()
+          e.preventDefault()
+          console.log('Dumping...')
+          goTo(<Stage rom={roms.testing} />)
+        }}
+      >
+        Load sample
       </button>
       <br />
       <Console context={log} />

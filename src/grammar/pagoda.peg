@@ -9,7 +9,7 @@
   }
 }
 
-program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
+program = statements:(_? @(statement /*/ pragma*/) _)* _? {
   return {
     type: 'program',
     statements,
@@ -20,6 +20,7 @@ program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
 // --------- STATEMENTS --------- //
 statement
   = section
+  / monoid
   / ifCase
   / character
   / returnStatement
@@ -57,7 +58,7 @@ call = 'call' _? target:name params:(_? 'with' @(' '+ @expression)+)? {
   return {
     type: 'call',
     target,
-    params
+    params: params ?? []
   }
 }
 
@@ -99,6 +100,12 @@ returnStatement = 'return' _? value:expression {
   }
 }
 
+monoid = type:('clear' / 'end' / 'wait') {
+  return {
+    type
+  }
+}
+
 // -- NON-SHARED ATOMS -- //
 
 choiceCase = match:(string / name) _? then:block {
@@ -109,10 +116,9 @@ choiceCase = match:(string / name) _? then:block {
   }
 }
 
-
 // --------- EXPRESSIONS --------- //
 
-expression = compareExpr
+expression = logicExpr
 
 atom
   = call
@@ -123,6 +129,15 @@ atom
   / boolean
   / name
   / '(' _? @expression _? ')'
+
+logicExpr = left:compareExpr _ operator:('and'/'or') _ right:logicExpr {
+  return {
+    type: 'binary',
+    operator,
+    left,
+    right
+  }
+} / compareExpr
 
 compareExpr = left:addExpr _? operator:COMPARE_OP _? right:compareExpr {
   return {

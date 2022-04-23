@@ -1,3 +1,4 @@
+import EventEmitter from 'events'
 import { useEffect, useState } from 'react'
 import { useScreen } from '../components/Screen'
 import * as lib from '../grammar/pagoda'
@@ -12,7 +13,6 @@ interface ChoiceProps {
   title: string
 }
 
-let last = false
 function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
   return (
     <div
@@ -29,7 +29,9 @@ function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
         return (
           <button
             key={`${title}_ch_${i}`}
-            onClick={async () => {
+            onClick={async e => {
+              e.stopPropagation()
+              e.preventDefault()
               await rt.start(opt.then)
               done()
             }}
@@ -43,17 +45,28 @@ function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
   )
 }
 
+const events = new EventEmitter()
+
 let once = false
 export default function Stage({ rom }: { rom: Rom }) {
   const goTo = useScreen()
   const [narration, narrate] = useState<JSX.Element[]>([])
   const [choice, setChoice] = useState<JSX.Element | null>(null)
   const [ended, setEnded] = useState(false)
+  const [waiting, setWaiting] = useState(false)
   useEffect(() => {
     if (once) return
     once = true
     const rt = new lib.Runtime(async function (stmt) {
       switch (stmt.type) {
+        case 'clear':
+          narrate(s => [])
+          break
+        case 'wait':
+          setWaiting(true)
+          await new Promise(r => events.once('tap', r))
+          setWaiting(false)
+          break
         case 'dialogue':
           {
             const actor = await this.getActor(stmt)
@@ -102,12 +115,26 @@ export default function Stage({ rom }: { rom: Rom }) {
       rt.start(result.value).then(() => {
         setEnded(true)
       })
+    } else {
+      const text = rom.scripts[rom.entry]
+      narrate(s => [
+        ...s,
+        <div style={{ color: 'red' }}>
+          <h2>Fatal Error</h2>
+          <pre>
+            {(result.error as any).format([{ source: rom.entry, text }])}
+          </pre>
+        </div>,
+      ])
+      setEnded(true)
     }
   }, [])
   function handleTap() {
     if (ended) {
       once = false
       goTo(<LoadRom />)
+    } else if (waiting) {
+      events.emit('tap')
     }
   }
   return (
@@ -115,6 +142,7 @@ export default function Stage({ rom }: { rom: Rom }) {
       {narration.map((n, i) => (
         <div key={`__narration-${i}`}>{n}</div>
       ))}
+      {waiting ? <div className="pulsating">V</div> : null}
       {choice}
       {ended ? (
         <div style={{ color: 'gray' }}>

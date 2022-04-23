@@ -35,8 +35,23 @@ export class Runtime {
     return rt
   }
 
+  private async tryFind(target: string, value: any) {
+    if (target in this.locals) {
+      this.locals[target] = value
+      return true
+    }
+    if (this.parent != null) {
+      return this.parent.tryFind(target, value)
+    }
+    return false
+  }
+
   private async assignment(assign: Assign) {
-    this.locals[assign.target] = await this.solve(assign.value)
+    const target = assign.target
+    const value = await this.solve(assign.value)
+    if (this.parent == null || !this.parent.tryFind(target, value)) {
+      this.locals[target] = value
+    }
   }
 
   private async solveBinary(expr: Expression): Promise<Value> {
@@ -44,6 +59,10 @@ export class Runtime {
       const left = await this.solve(expr.left)
       const right = await this.solve(expr.right)
       switch (expr.operator) {
+        case 'and':
+          return left && right
+        case 'or':
+          return left || right
         case '+':
           return left + right
         case '-':
@@ -251,6 +270,7 @@ export type Statement =
   | Dialogue
   | Narration
   | CharacterDeclaration
+  | Monoid
 
 export interface CharacterDeclaration extends Node<'character'> {
   target: IDENTIFIER
@@ -294,6 +314,8 @@ export interface Dialogue extends Node<'dialogue'> {
 export interface Return extends Node<'return'> {
   value: Expression
 }
+
+export type Monoid = Node<'clear' | 'end' | 'wait'>
 
 export interface ChoiceCase extends Node<'case'> {
   match: Str | Name

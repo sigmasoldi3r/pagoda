@@ -11,7 +11,7 @@ set hunger to 0
 set food to 0
 
 section walk {
-  add -1 to hunger
+  add 1 to hunger
 }
 
 section riverActions {

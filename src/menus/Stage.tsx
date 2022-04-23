@@ -1,17 +1,8 @@
 import { useEffect, useState } from 'react'
-import Console, { useConsole } from '../components/Console'
-import { parse } from '../grammar/pagoda.peg'
+import { useScreen } from '../components/Screen'
 import * as lib from '../grammar/pagoda'
-import { trying } from '../lib/Result'
-
-const sleep = (n: number) => new Promise(r => setTimeout(r, n))
-
-const loadProgram = (src: string) =>
-  trying(() => {
-    return parse<lib.Program>(src)
-  })
-
-let running = false
+import { Rom } from '../lib/storage/Rom'
+import LoadRom from './LoadRom'
 
 interface ChoiceProps {
   done: () => void
@@ -23,29 +14,22 @@ interface ChoiceProps {
 
 let last = false
 function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
-  const [solved, setSolved] = useState(last)
-  console.log(solved, last)
-  useEffect(() => {
-    if (solved) {
-      last = true
-    }
-  }, [solved])
   return (
-    <div style={{ display: 'flex', flexFlow: 'column' }}>
-      <h2>{title}</h2>
+    <div
+      style={{
+        display: 'flex',
+        flexFlow: 'column',
+        border: '1px solid gray',
+        margin: '1rem',
+        padding: '1rem',
+      }}
+    >
+      <h3>{title}</h3>
       {options.map(([opt, label], i) => {
-        if (solved) {
-          return (
-            <button key={`${title}_ch_${i}`} className="choice disabled">
-              {label}
-            </button>
-          )
-        }
         return (
           <button
             key={`${title}_ch_${i}`}
             onClick={async () => {
-              setSolved(true)
               await rt.start(opt.then)
               done()
             }}
@@ -59,71 +43,86 @@ function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
   )
 }
 
-export default function Stage({ rom }: { rom: string }) {
-  const log = useConsole()
-  const rt = new lib.Runtime(async function (stmt) {
-    switch (stmt.type) {
-      case 'dialogue':
-        {
-          const actor = await this.getActor(stmt)
-          log.println(
-            <span style={{ color: '#' + actor.color.toString(16) }}>
-              {actor.name}: {await this.getText(stmt)}
-            </span>
-          )
-        }
-        break
-      case 'narration':
-        log.println(await this.getText(stmt))
-        break
-      case 'choice':
-        await new Promise<void>(async done => {
-          const title = await this.solve(stmt.title)
-          const options: [lib.ChoiceCase, any][] = []
-          for (const opt of stmt.options) {
-            options.push([opt, await this.solve(opt.match)])
+let once = false
+export default function Stage({ rom }: { rom: Rom }) {
+  const goTo = useScreen()
+  const [narration, narrate] = useState<JSX.Element[]>([])
+  const [choice, setChoice] = useState<JSX.Element | null>(null)
+  const [ended, setEnded] = useState(false)
+  useEffect(() => {
+    if (once) return
+    once = true
+    const rt = new lib.Runtime(async function (stmt) {
+      switch (stmt.type) {
+        case 'dialogue':
+          {
+            const actor = await this.getActor(stmt)
+            const text = await this.getText(stmt)
+            narrate(s => [
+              ...s,
+              <div
+                className="narration-line"
+                style={{ color: '#' + actor.color.toString(16) }}
+              >
+                {actor.name}: {text}
+              </div>,
+            ])
           }
-          log.println(
-            <ChoiceMenu
-              title={title}
-              def={stmt}
-              rt={this}
-              options={options}
-              done={done}
-            />
-          )
-        })
-        break
-    }
-    return stmt
-  })
-  async function loadRom() {
-    if (running) return
-    running = true
-    log.clear()
-    log.println('Loading rom...')
-    const result = loadProgram(rom)
+          break
+        case 'narration':
+          {
+            const text = await this.getText(stmt)
+            narrate(s => [...s, <div className="narration-line">{text}</div>])
+          }
+          break
+        case 'choice':
+          await new Promise<void>(async done => {
+            const title = await this.solve(stmt.title)
+            const options: [lib.ChoiceCase, any][] = []
+            for (const opt of stmt.options) {
+              options.push([opt, await this.solve(opt.match)])
+            }
+            setChoice(
+              <ChoiceMenu
+                title={title}
+                def={stmt}
+                rt={this}
+                options={options}
+                done={done}
+              />
+            )
+          })
+          setChoice(null)
+          break
+      }
+      return stmt
+    })
+    const result = rom.getScript(rom.entry)
     if (result.success()) {
-      log.println('Done!')
-      rt.start(result.value)
-    } else {
-      log.println(
-        <div style={{ color: 'red' }}>
-          <h4>Can't load this rom:</h4>
-          <p>
-            {(result.error as any).format?.([{ text: rom }]) ??
-              result.error.toString()}
-          </p>
-        </div>
-      )
+      rt.start(result.value).then(() => {
+        setEnded(true)
+      })
+    }
+  }, [])
+  function handleTap() {
+    if (ended) {
+      once = false
+      goTo(<LoadRom />)
     }
   }
-  useEffect(() => {
-    loadRom()
-  }, [])
   return (
-    <div>
-      <Console context={log} />
+    <div onClick={handleTap} style={{ minHeight: '100%' }}>
+      {narration.map((n, i) => (
+        <div key={`__narration-${i}`}>{n}</div>
+      ))}
+      {choice}
+      {ended ? (
+        <div style={{ color: 'gray' }}>
+          <hr />
+          <div>Script ended</div>
+          <div>Tap anywhere to exit</div>
+        </div>
+      ) : null}
     </div>
   )
 }

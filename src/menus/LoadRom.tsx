@@ -30,7 +30,7 @@ export default function LoadRom() {
     const src = await file?.arrayBuffer()
     log.println(`Parsing sources...`)
     if (src != null) {
-      const rom = Rom.fromBinary(src)
+      const rom = Rom.decode(src)
       log.println(`Loading ${rom.name}`)
       log.println(`By ${rom.author}`)
       log.println(`${Object.keys(rom.scripts).length} script(s) found.`)

@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "@octantis/option": "^1.2.0",
+    "godb": "^0.6.2",
     "monaco-editor": "0.33.0",
     "pako": "^2.0.4",
     "pixi.js": "^6.3.0",

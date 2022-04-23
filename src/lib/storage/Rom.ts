@@ -4,6 +4,9 @@ import { parse } from '../../grammar/pagoda.peg'
 import * as lib from '../../grammar/pagoda'
 import { trying } from '../Result'
 
+export type RomHeader = Pick<Rom, 'author' | 'name' | 'version' | 'entry'>
+export type DeflatedRom = RomHeader & { scripts: Record<string, Buffer> }
+
 /**
  * Project level information.
  * Contains program, logic and levels.
@@ -13,25 +16,38 @@ import { trying } from '../Result'
  * Then invoke toURL(), append as http://sigmasoldi3r.github.io/pagoda?rom=the-generated-url-here
  */
 export class Rom {
-  static fromBinary(bufferLike: ArrayBuffer | Uint8Array | Buffer) {
-    const buffer = Buffer.from(bufferLike)
-    const decoded = Buffer.from(pako.inflate(buffer)).toString()
-    const raw = JSON.parse(decoded)
+  /** Decodes a binary encoded ROM file. */
+  static decode(data: BinaryData) {
+    const partial = Rom.inflate(data)
     const rom = new Rom()
-    rom.author = raw.author
-    rom.name = raw.name
-    rom.version = raw.version
-    rom.entry = raw.entry
-    for (const [key, content] of Object.entries(raw.scripts)) {
-      rom.scripts[key] = Buffer.from(
-        pako.inflate(Buffer.from(content as string, 'base64'))
-      ).toString()
+    rom.copy(partial)
+    for (const [key, content] of Object.entries(partial.scripts)) {
+      rom.scripts[key] = Buffer.from(pako.inflate(content)).toString()
     }
     return rom
   }
+
+  /** Returns a partially decoded ROM where binary data is not yet inflated. */
+  static inflate(data: BinaryData): DeflatedRom {
+    const buffer = Buffer.from(data)
+    const decoded = Buffer.from(pako.inflate(buffer)).toString()
+    const raw = JSON.parse(decoded)
+    for (const [key, content] of Object.entries(raw.scripts)) {
+      raw[key] = Buffer.from(content as string, 'base64')
+    }
+    return raw
+  }
+
+  /** Partial decode only of the header data. */
+  static decodeHeaders(data: BinaryData): RomHeader {
+    const partial = Rom.inflate(data) as Partial<DeflatedRom>
+    delete partial.scripts
+    return partial as RomHeader
+  }
+
   /** Parses form a base64 string the current ROM information. */
   static fromText(component: string): Rom {
-    return Rom.fromBinary(Buffer.from(component, 'base64'))
+    return Rom.decode(Buffer.from(component, 'base64'))
   }
 
   /** Parses the ROM from the current window location. */
@@ -51,6 +67,13 @@ export class Rom {
   version = [1, 0, 0]
   entry = 'init.pag'
 
+  copy(headers: DeflatedRom | RomHeader): void {
+    this.author = headers.author
+    this.version = headers.version
+    this.name = headers.name
+    this.entry = headers.entry
+  }
+
   /** Try parse the script. */
   getScript(name: string) {
     return trying(() => {
@@ -63,7 +86,7 @@ export class Rom {
   }
 
   /** Serializes this ROM as a .rom file. */
-  serialize() {
+  encode() {
     const data = {
       name: this.name,
       author: this.author,
@@ -89,7 +112,7 @@ export class Rom {
 
   /** Encodes the room into an ascii compatible medium. */
   serializeBase64() {
-    return Buffer.from(this.serialize()).toString('base64')
+    return Buffer.from(this.encode()).toString('base64')
   }
 
   /** Converts the rom object into a ready to copy-and-paste URL */

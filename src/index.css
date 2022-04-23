@@ -103,6 +103,13 @@ code {
   text-align: left;
 }
 
+.btn-disabled {
+  border-style: inset;
+  background-color: rgb(169, 169, 169);
+  color: rgb(69, 69, 69);
+  cursor: not-allowed;
+}
+
 /* Fonts */
 @font-face {
   font-family: 'Press Start';

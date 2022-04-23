@@ -7,9 +7,22 @@ import pagodaLogo from '../logo.png'
 import Icon from '../components/Icon'
 import { useScreen } from '../components/Screen'
 import RomList from './RomList'
+import * as builtins from '../roms'
+import * as db from '../lib/storage/database'
+import { useEffect, useState } from 'react'
 
 // Main menu component.
 export default function MainMenu() {
+  const [locked, setLocked] = useState(false)
+  const [alreadyExists, setAlreadyExists] = useState(true)
+  useEffect(() => {
+    db.roms.getAll().then(all => {
+      const one = all.find(row => row.name === builtins.testing.name)
+      if (one == null) {
+        setAlreadyExists(false)
+      }
+    })
+  }, [])
   const go = useScreen()
   function openRom() {
     go(<RomList />)
@@ -17,6 +30,19 @@ export default function MainMenu() {
   function importRom() {}
   function createRom() {}
   function goToOptions() {}
+  async function importSampleRom() {
+    setLocked(true)
+    const rom = builtins.testing
+    const binary = rom.encode()
+    await db.roms.add({
+      name: rom.name,
+      data: binary,
+    })
+    console.log('Done!')
+    setAlreadyExists(true)
+    db.roms.consoleTable()
+    setLocked(false)
+  }
   return (
     <div
       style={{
@@ -41,16 +67,19 @@ export default function MainMenu() {
           />
           <h1>Pagoda Engine</h1>
         </div>
-        <Button onClick={openRom}>
+        <Button disabled={locked} onClick={openRom}>
           <Icon src={folder} /> &nbsp;Open a ROM
         </Button>
-        <Button onClick={importRom}>
+        <Button disabled={locked} onClick={importRom}>
           <Icon src={diskette} /> &nbsp;Import a ROM file
         </Button>
-        <Button onClick={createRom}>
+        <Button disabled={alreadyExists || locked} onClick={importSampleRom}>
+          <Icon src={diskette} /> &nbsp;Load a sample ROM file
+        </Button>
+        <Button disabled={locked} onClick={createRom}>
           <Icon src={newPackage} /> &nbsp;Create a new ROM
         </Button>
-        <Button onClick={goToOptions}>
+        <Button disabled={locked} onClick={goToOptions}>
           <Icon src={cog} /> &nbsp;Options
         </Button>
       </div>

@@ -4918,6 +4918,11 @@ globby@^6.1.0:
     pify "^2.0.0"
     pinkie-promise "^2.0.0"
 
+godb@^0.6.2:
+  version "0.6.2"
+  resolved "https://registry.yarnpkg.com/godb/-/godb-0.6.2.tgz#0c380310558a7c9114f49aa70c1a1da67313120e"
+  integrity sha512-641W5/CzvwWCCW8Z5ETT6Js6posF5XXbc93F8fwJNseTpuQsTuJPxRntZPe6iYtb9ExfNlGteK09cN3Sl2avXw==
+
 graceful-fs@^4.1.2, graceful-fs@^4.1.6, graceful-fs@^4.2.0, graceful-fs@^4.2.4, graceful-fs@^4.2.6, graceful-fs@^4.2.9:
   version "4.2.10"
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.10.tgz#147d3a006da4ca3ce14728c7aefc287c367d7a6c"

@@ -36,7 +36,7 @@ export default function MainMenu() {
       >
         <div style={{ textAlign: 'center' }}>
           <Icon
-            imgStyle={{ left: 'calc(-32px + 16px/2 - 1px)' }}
+            imgStyle={{ left: 'calc(-64px + 16px/2 - 1px)', width: '128px' }}
             src={pagodaLogo}
           />
           <h1>Pagoda Engine</h1>

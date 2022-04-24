@@ -4,8 +4,14 @@ import { parse } from '../../grammar/pagoda.peg'
 import * as lib from '../../grammar/pagoda'
 import { trying } from '../Result'
 
-export type RomHeader = Pick<Rom, 'author' | 'name' | 'version' | 'entry'>
-export type DeflatedRom = RomHeader & { scripts: Record<string, Buffer> }
+export type RomHeader = Pick<Rom, 'author' | 'name' | 'version' | 'entry'> & {
+  scriptNames: string[]
+  assetNames: string[]
+}
+export type DeflatedRom = Omit<RomHeader, 'scriptNames' | 'assetNames'> & {
+  scripts: Record<string, Uint8Array>
+  assets: Record<string, Uint8Array>
+}
 
 /**
  * Project level information.
@@ -62,6 +68,7 @@ export class Rom {
   baseURL = 'http://sigmasoldi3r.github.io/pagoda'
 
   scripts: Record<string, string> = {}
+  assets: Record<string, Uint8Array> = {}
   name = 'Unnamed'
   author = 'Unknown Pagoda fella'
   version = [1, 0, 0]

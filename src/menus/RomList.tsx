@@ -5,8 +5,10 @@ import { Rom, RomHeader } from '../lib/storage/Rom'
 import MainMenu from './MainMenu'
 import * as db from '../lib/storage/database'
 import Icon from '../components/Icon'
-import diskette from '../icons/diskette.png'
 import Stage from './Stage'
+import diskette from '../icons/diskette.png'
+import pen from '../icons/pen.png'
+import trash from '../icons/trash.png'
 
 type RomDBEntity = { id: number; data: Uint8Array; name: string }
 type RomEntry = Pick<RomDBEntity, 'id'> & RomHeader
@@ -83,6 +85,12 @@ export default function RomList() {
                   &nbsp;
                   <Button onClick={loadRom(rom)}>
                     <Icon src={diskette} /> Load
+                  </Button>
+                  <Button onClick={loadRom(rom)}>
+                    <Icon src={pen} /> Edit
+                  </Button>
+                  <Button onClick={loadRom(rom)}>
+                    <Icon src={trash} /> Delete
                   </Button>
                 </div>
               ))}

@@ -10,6 +10,8 @@ import RomList from './RomList'
 import * as builtins from '../roms'
 import * as db from '../lib/storage/database'
 import { useEffect, useState } from 'react'
+import { Rom } from '../lib/storage/Rom'
+import Pako from 'pako'
 
 // Main menu component.
 export default function MainMenu() {
@@ -74,7 +76,7 @@ export default function MainMenu() {
           <Icon src={diskette} /> &nbsp;Import a ROM file
         </Button>
         <Button disabled={alreadyExists || locked} onClick={importSampleRom}>
-          <Icon src={diskette} /> &nbsp;Load a sample ROM file
+          <Icon src={diskette} /> &nbsp;Import sample ROM
         </Button>
         <Button disabled={locked} onClick={createRom}>
           <Icon src={newPackage} /> &nbsp;Create a new ROM

@@ -6,6 +6,7 @@ import { Rom } from '../lib/storage/Rom'
 import Stage from './Stage'
 import * as roms from '../roms'
 
+/** @deprecated */
 export default function LoadRom() {
   const log = useConsole()
   const inputRef = useRef<HTMLInputElement>()
@@ -26,8 +27,10 @@ export default function LoadRom() {
     const input = inputRef.current
     const file = input?.files?.item(0)
     log.println(`Loading ${file?.name}`)
-
-    const src = await file?.arrayBuffer()
+    if (file == null) {
+      return
+    }
+    const src = new Uint8Array(await file.arrayBuffer())
     log.println(`Parsing sources...`)
     if (src != null) {
       const rom = Rom.decode(src)

@@ -17,7 +17,7 @@ export type DeflatedRom = RomHeader & { scripts: Record<string, Buffer> }
  */
 export class Rom {
   /** Decodes a binary encoded ROM file. */
-  static decode(data: BinaryData) {
+  static decode(data: Uint8Array) {
     const partial = Rom.inflate(data)
     const rom = new Rom()
     rom.copy(partial)
@@ -28,18 +28,18 @@ export class Rom {
   }
 
   /** Returns a partially decoded ROM where binary data is not yet inflated. */
-  static inflate(data: BinaryData): DeflatedRom {
-    const buffer = Buffer.from(data)
-    const decoded = Buffer.from(pako.inflate(buffer)).toString()
+  static inflate(data: Uint8Array): DeflatedRom {
+    const inflated = pako.inflate(data)
+    const decoded = Buffer.from(inflated).toString()
     const raw = JSON.parse(decoded)
     for (const [key, content] of Object.entries(raw.scripts)) {
-      raw[key] = Buffer.from(content as string, 'base64')
+      raw.scripts[key] = Buffer.from(content as string, 'base64')
     }
     return raw
   }
 
   /** Partial decode only of the header data. */
-  static decodeHeaders(data: BinaryData): RomHeader {
+  static decodeHeaders(data: Uint8Array): RomHeader {
     const partial = Rom.inflate(data) as Partial<DeflatedRom>
     delete partial.scripts
     return partial as RomHeader

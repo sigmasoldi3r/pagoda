@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useScreen } from '../components/Screen'
 import * as lib from '../grammar/pagoda'
 import { Rom } from '../lib/storage/Rom'
-import LoadRom from './LoadRom'
+import MainMenu from './MainMenu'
 
 interface ChoiceProps {
   done: () => void
@@ -140,7 +140,7 @@ export default function Stage({ rom }: { rom: Rom }) {
   function handleTap() {
     if (ended) {
       once = false
-      goTo(<LoadRom />)
+      goTo(<MainMenu />)
     } else if (waiting) {
       events.emit('tap')
     }

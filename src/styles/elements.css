@@ -97,6 +97,13 @@ ul.list {
   margin-bottom: 0.5rem;
 }
 
+/* Others */
+.exponent {
+  font-size: xx-small;
+  top: -0.68rem;
+  position: relative;
+}
+
 /* Dialogues */
 .modal-dialog {
   display: flex;

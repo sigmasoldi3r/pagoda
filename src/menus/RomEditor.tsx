@@ -5,11 +5,13 @@ import '../grammar/editor'
 import { Rom } from '../lib/storage/Rom'
 import useOptionState from '../lib/useOptionState'
 import Icon from '../components/Icon'
-import addScript from '../icons/add_script.png'
+import addScriptIcon from '../icons/add_script.png'
 import diskette from '../icons/diskette.png'
-import addText from '../icons/add_text.png'
-import uploadFile from '../icons/upload_file.png'
+import addTextIcon from '../icons/add_text.png'
+import uploadFileIcon from '../icons/upload_file.png'
 import Input from '../components/Input'
+import prompt from '../components/DialogPrompt'
+import Exp from '../components/Exp'
 
 export interface RomEditorProps {
   rom?: Rom
@@ -44,7 +46,7 @@ function getLang(ext: string) {
 // Rom project editor.
 export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
   const ref = useRef<HTMLDivElement>()
-  const [rom, setRom] = useOptionState<Rom>()
+  const [rom, setRom, , updateRom] = useOptionState<Rom>()
   const [editor, setEditor] = useOptionState<Editor>()
   const [inputs, setInputs] = useState({ name: '', author: '', entry: '' })
   const [editing, setEditing] = useState<[Editables, string]>([
@@ -114,6 +116,20 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
       'pagoda',
     ]
   }
+  async function createScript() {
+    for (const name of await prompt('Enter a file name')) {
+      updateRom(rom =>
+        rom.map(rom => {
+          if (rom.scripts[name] == null) {
+            rom.scripts[name] = ''
+          }
+          return rom
+        })
+      )
+    }
+  }
+  async function uploadFile() {}
+  async function createText() {}
 
   // EFFECTS //
   useEffect(() => {
@@ -197,12 +213,13 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
                         className="entry"
                         onClick={() => updateEditing(['scripts', key])}
                       >
-                        {key} ({script.length} bytes)
+                        {key}
+                        <Exp>19222</Exp>
                       </li>
                     ))}
                   </ul>
-                  <Button className="wide">
-                    <Icon src={addScript} /> Create Script
+                  <Button className="wide" onClick={createScript}>
+                    <Icon src={addScriptIcon} /> Create Script
                   </Button>
                 </div>
                 <div>
@@ -218,15 +235,16 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
                           }
                         }}
                       >
-                        {key} ({asset.length} bytes)
+                        {key}{' '}
+                        <small className="exponent">{asset.length} bytes</small>
                       </li>
                     ))}
                   </ul>
-                  <Button className="wide">
-                    <Icon src={uploadFile} /> Upload File
+                  <Button className="wide" onClick={uploadFile}>
+                    <Icon src={uploadFileIcon} /> Upload File
                   </Button>
-                  <Button className="wide">
-                    <Icon src={addText} /> Create Text
+                  <Button className="wide" onClick={createText}>
+                    <Icon src={addTextIcon} /> Create Text
                   </Button>
                 </div>
               </>

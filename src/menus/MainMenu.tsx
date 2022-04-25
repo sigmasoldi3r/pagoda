@@ -29,10 +29,7 @@ export default function MainMenu() {
     go(<RomList />)
   }
   function importRom() {}
-  async function createRom() {
-    const answer = await prompt("Are you sure that you're so armstrong?")
-    console.log('ARMSTRONG:', answer)
-  }
+  async function createRom() {}
   function goToOptions() {}
   async function importSampleRom() {
     setLocked(true)

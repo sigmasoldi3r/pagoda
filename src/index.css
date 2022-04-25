@@ -110,6 +110,12 @@ code {
   cursor: not-allowed;
 }
 
+@media screen and (max-width: 400px) {
+  .only-lg {
+    display: none;
+  }
+}
+
 /* Fonts */
 @font-face {
   font-family: 'Press Start';

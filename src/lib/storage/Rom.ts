@@ -13,6 +13,22 @@ export type DeflatedRom = Omit<RomHeader, 'scriptNames' | 'assetNames'> & {
   assets: Record<string, Uint8Array>
 }
 
+export type Profile = {
+  name: string
+  data: any
+}
+export type ProfileDescriptor =
+  | {
+      type: 'profiles'
+      limit?: number
+      data: Profile[]
+    }
+  | {
+      type: 'saves'
+      limit?: number
+      data: any[]
+    }
+
 /**
  * Project level information.
  * Contains program, logic and levels.
@@ -47,8 +63,13 @@ export class Rom {
   /** Partial decode only of the header data. */
   static decodeHeaders(data: Uint8Array): RomHeader {
     const partial = Rom.inflate(data) as Partial<DeflatedRom>
+    const { scripts, assets } = partial
     delete partial.scripts
-    return partial as RomHeader
+    delete partial.assets
+    const header = partial as RomHeader
+    header.assetNames = Object.keys(assets ?? {})
+    header.scriptNames = Object.keys(scripts ?? {})
+    return header
   }
 
   /** Parses form a base64 string the current ROM information. */
@@ -73,6 +94,12 @@ export class Rom {
   author = 'Unknown Pagoda fella'
   version = [1, 0, 0]
   entry = 'init.pag'
+  profiles: ProfileDescriptor = {
+    type: 'profiles',
+    limit: 3,
+    data: [],
+  }
+  meta: Record<string, any> = {}
 
   copy(headers: DeflatedRom | RomHeader): void {
     this.author = headers.author

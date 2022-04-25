@@ -1,11 +1,15 @@
 import * as monaco from 'monaco-editor'
 import { useEffect, useRef, useState } from 'react'
 import Button from '../components/Button'
+import '../grammar/editor'
 import { Rom } from '../lib/storage/Rom'
 import useOptionState from '../lib/useOptionState'
-import addScript from '../icons/add_script.png'
 import Icon from '../components/Icon'
-import '../grammar/editor'
+import addScript from '../icons/add_script.png'
+import diskette from '../icons/diskette.png'
+import addText from '../icons/add_text.png'
+import uploadFile from '../icons/upload_file.png'
+import Input from '../components/Input'
 
 export interface RomEditorProps {
   rom?: Rom
@@ -89,18 +93,23 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
 
   function getInitialContent(): [string, string] {
     for (const r of rom) {
-      if (r.assets['readme.md'] != null) {
-        return [Buffer.from(r.assets['readme.md']).toString(), 'markdown']
+      const entry = r.scripts[r.entry]
+      if (entry != null) {
+        return [entry, 'pagoda']
       }
     }
     return [
-      `# Hello World
-
-This is your project readme.
-Feel free to edit.
-
-\\*__Note__: This document will contain a detailed tutorial in the future.`,
-      'markdown',
+      `###
+# Welcome to Pagoda script editor!
+# This is your game entry point script, from here
+# you can navigate to other scripts and create
+# assets. Feel free to remove this comments.
+#
+# To get started read the docs about the Pagoda
+# scripting language:
+# https://github.com/sigmasoldi3r/pagoda
+###`,
+      'pagoda',
     ]
   }
 
@@ -143,14 +152,18 @@ Feel free to edit.
     <div style={{ height: '100%' }}>
       <div className="editor">
         <div className="editor-items">
-          {editor.zip(rom).fold(<></>, ([editor, rom]) => {
+          {editor.zip(rom).fold(<></>, ([, rom]) => {
             const scripts = Object.entries(rom.scripts)
             const assets = Object.entries(rom.assets)
             return (
               <>
                 <h3>ROM Content</h3>
-                <small>{rom.name}</small>
-                <p>SLOC: {content.length}</p>
+                <Input title="Name" value={rom.name} />
+                <Input title="Author" value={rom.author} />
+                <Input title="Entry Point" value={rom.entry} />
+                <Button>
+                  <Icon src={diskette} /> Save Changes
+                </Button>
                 <hr />
                 <div>
                   <h4>Scripts ({scripts.length})</h4>
@@ -165,7 +178,7 @@ Feel free to edit.
                       </li>
                     ))}
                   </ul>
-                  <Button>
+                  <Button className="wide">
                     <Icon src={addScript} /> Create Script
                   </Button>
                 </div>
@@ -186,6 +199,12 @@ Feel free to edit.
                       </li>
                     ))}
                   </ul>
+                  <Button className="wide">
+                    <Icon src={uploadFile} /> Upload File
+                  </Button>
+                  <Button className="wide">
+                    <Icon src={addText} /> Create Text
+                  </Button>
                 </div>
               </>
             )

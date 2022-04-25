@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from 'react'
 import Button from '../components/Button'
 import { Rom } from '../lib/storage/Rom'
 import useOptionState from '../lib/useOptionState'
+import addScript from '../icons/add_script.png'
+import Icon from '../components/Icon'
 
 export interface RomEditorProps {
   rom?: Rom
@@ -60,20 +62,22 @@ Feel free to edit.
             <hr />
             <div>
               <h4>Scripts ({scripts.length})</h4>
-              <ul>
+              <ul className="list">
                 {scripts.map(([key, script], i) => (
-                  <li key={`_rom_script_${i}`}>
+                  <li key={`_rom_script_${i}`} className="entry">
                     {key} ({script.length} bytes)
                   </li>
                 ))}
               </ul>
-              <Button>Create Script</Button>
+              <Button>
+                <Icon src={addScript} /> Create Script
+              </Button>
             </div>
             <div>
               <h4>Assets ({assets.length})</h4>
-              <ul>
+              <ul className="list">
                 {assets.map(([key, asset], i) => (
-                  <li key={`_rom_script_${i}`}>
+                  <li key={`_rom_asset_${i}`} className="entry">
                     {key} ({asset.length} bytes)
                   </li>
                 ))}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
 import { useScreen } from '../components/Screen'
-import { Rom, RomHeader } from '../lib/storage/Rom'
+import { Rom } from '../lib/storage/Rom'
 import MainMenu from './MainMenu'
 import * as db from '../lib/storage/database'
 import RomDetails from './RomDetails'
@@ -67,12 +67,7 @@ export default function RomList() {
                 <div
                   onClick={loadRomDetails(rom)}
                   key={`_rom${i}`}
-                  style={{
-                    border: '1px solid gray',
-                    backgroundColor: '#222',
-                    padding: '1rem',
-                    marginBottom: '0.5rem',
-                  }}
+                  className="entry"
                 >
                   {rom.name} v{rom.version.join('.')} by {rom.author}
                 </div>

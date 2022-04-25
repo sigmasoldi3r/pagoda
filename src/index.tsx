@@ -1,6 +1,5 @@
 import React from 'react'
-import './index.css'
-import './reset.css'
+import './styles/root.css'
 import App from './App'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import reportWebVitals from './reportWebVitals'

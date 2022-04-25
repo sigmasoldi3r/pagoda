@@ -1,0 +1,40 @@
+/* Elements */
+.btn {
+  padding: 1rem;
+  padding-right: 2rem;
+  padding-left: 2rem;
+  margin: 0.2rem;
+  line-height: 1.2rem;
+  border-radius: 0;
+  text-align: left;
+}
+
+.btn-disabled {
+  border-style: inset;
+  background-color: rgb(169, 169, 169);
+  color: rgb(69, 69, 69);
+  cursor: not-allowed;
+}
+
+.choice.disabled {
+  background-color: lightgray;
+  color: gray;
+}
+
+.icon {
+  display: inline;
+  min-width: 32px;
+  height: 0;
+  position: relative;
+}
+.icon > img {
+  left: -50%;
+  position: absolute;
+  width: auto;
+  max-width: initial;
+  height: auto;
+  bottom: -50%;
+  padding-left: 0.1rem;
+  padding-right: 0.1rem;
+  image-rendering: pixelated;
+}

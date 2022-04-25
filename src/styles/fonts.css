@@ -1,0 +1,15 @@
+/* Fonts */
+@font-face {
+  font-family: 'Press Start';
+  src: url('./fonts/prstart.ttf');
+}
+
+@font-face {
+  font-family: 'Pixel';
+  src: url('./fonts/Pixel.ttf');
+}
+
+@font-face {
+  font-family: 'DP Comic';
+  src: url('./fonts/dpcomic.ttf');
+}

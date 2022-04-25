@@ -1,0 +1,40 @@
+/*
+  Main styles to layout the app and it's containers.
+*/
+@import './reset.css';
+@import './fonts.css';
+@import './elements.css';
+@import './semantic.css';
+@import './animations.css';
+
+html,
+body,
+#root {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  max-width: 100vw;
+  max-height: 100vh;
+  font-family: 'Press Start';
+}
+
+code {
+  font-family: 'Press Start', monospace;
+}
+
+#root {
+  position: absolute;
+  color: white;
+}
+#root code {
+  line-height: 1.2rem;
+}
+
+#root > div > div > div.monaco-editor * {
+  font-family: 'Press Start', monospace;
+}

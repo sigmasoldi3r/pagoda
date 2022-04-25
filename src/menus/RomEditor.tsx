@@ -46,9 +46,10 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
   const ref = useRef<HTMLDivElement>()
   const [rom, setRom] = useOptionState<Rom>()
   const [editor, setEditor] = useOptionState<Editor>()
+  const [inputs, setInputs] = useState({ name: '', author: '', entry: '' })
   const [editing, setEditing] = useState<[Editables, string]>([
-    'assets',
-    'readme.md',
+    'scripts',
+    'init.pag',
   ])
   const [content, setContent] = useState('')
 
@@ -95,6 +96,7 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     for (const r of rom) {
       const entry = r.scripts[r.entry]
       if (entry != null) {
+        setEditing(['scripts', entry])
         return [entry, 'pagoda']
       }
     }
@@ -122,6 +124,9 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     }
   }, [])
   useEffect(() => {
+    for (const { name, author, entry } of rom) {
+      setInputs({ name, author, entry })
+    }
     if (editor.isEmpty() && ref.current != null) {
       while (ref.current.firstChild) {
         if (ref.current.lastChild != null) {
@@ -158,9 +163,27 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
             return (
               <>
                 <h3>ROM Content</h3>
-                <Input title="Name" value={rom.name} />
-                <Input title="Author" value={rom.author} />
-                <Input title="Entry Point" value={rom.entry} />
+                <Input
+                  title="Name"
+                  value={inputs.name}
+                  onChange={e =>
+                    setInputs(i => ({ ...i, name: e.target.value }))
+                  }
+                />
+                <Input
+                  title="Author"
+                  value={inputs.author}
+                  onChange={e =>
+                    setInputs(i => ({ ...i, author: e.target.value }))
+                  }
+                />
+                <Input
+                  title="Entry Point"
+                  value={inputs.entry}
+                  onChange={e =>
+                    setInputs(i => ({ ...i, entry: e.target.value }))
+                  }
+                />
                 <Button>
                   <Icon src={diskette} /> Save Changes
                 </Button>

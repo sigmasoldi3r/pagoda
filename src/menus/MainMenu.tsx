@@ -10,8 +10,7 @@ import RomList from './RomList'
 import * as builtins from '../roms'
 import * as db from '../lib/storage/database'
 import { useEffect, useState } from 'react'
-import { Rom } from '../lib/storage/Rom'
-import Pako from 'pako'
+import prompt from '../components/DialogPrompt'
 
 // Main menu component.
 export default function MainMenu() {
@@ -30,7 +29,10 @@ export default function MainMenu() {
     go(<RomList />)
   }
   function importRom() {}
-  function createRom() {}
+  async function createRom() {
+    const answer = await prompt("Are you sure that you're so armstrong?")
+    console.log('ARMSTRONG:', answer)
+  }
   function goToOptions() {}
   async function importSampleRom() {
     setLocked(true)

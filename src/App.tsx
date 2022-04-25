@@ -1,11 +1,15 @@
+import { DialogPromptProvider } from './components/DialogPrompt'
 import Screen from './components/Screen'
 import MainMenu from './menus/MainMenu'
 
 function App() {
   return (
-    <Screen>
-      <MainMenu />
-    </Screen>
+    <>
+      <DialogPromptProvider />
+      <Screen>
+        <MainMenu />
+      </Screen>
+    </>
   )
 }
 

@@ -96,3 +96,31 @@ ul.list {
   padding: 1rem;
   margin-bottom: 0.5rem;
 }
+
+/* Dialogues */
+.modal-dialog {
+  display: flex;
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.blackout {
+  position: absolute;
+  width: 100vw;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  z-index: 15;
+  background-color: rgba(34, 34, 34, 0.545);
+}
+
+.dialog {
+  background-color: #222;
+  z-index: 20;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}

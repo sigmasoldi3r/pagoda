@@ -22,7 +22,8 @@
 }
 
 ul.list {
-  list-style-type: square;
+  list-style-type: none;
+  padding: 0;
 }
 
 ::-webkit-scrollbar {

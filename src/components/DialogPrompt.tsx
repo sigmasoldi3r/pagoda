@@ -41,14 +41,16 @@ export function DialogPromptProvider() {
         <h2>{state.title}</h2>
         <p>{state.question}</p>
         {state.hiddenInput ? (
-          <hr style={{ width: '100%' }} />
+          <hr className="wide" />
         ) : (
           <Input
             title="answer"
             onChange={e => setState({ ...state, answer: e.target.value })}
           />
         )}
-        <div>
+        <div
+          style={{ width: '100%', display: 'flex', justifyContent: 'center' }}
+        >
           <Button
             onClick={() => {
               events.emit('accept', state.answer)
@@ -93,8 +95,7 @@ export default async function prompt(
   events.emit('request', title, question)
   return await untilAnswer()
 }
-
-export async function promptBoolean(
+prompt.bool = async function promptBool(
   question: string,
   title: string | null = null
 ): Promise<option<string>> {

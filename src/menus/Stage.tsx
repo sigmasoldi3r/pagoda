@@ -53,7 +53,7 @@ function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
 const events = new EventEmitter()
 
 let choices = 0
-let once = false
+let running = false
 export default function Stage({ rom }: { rom: Rom }) {
   const goTo = useScreen()
   const [narration, narrate] = useState<JSX.Element[]>([])
@@ -61,8 +61,8 @@ export default function Stage({ rom }: { rom: Rom }) {
   const [ended, setEnded] = useState(false)
   const [waiting, setWaiting] = useState(false)
   useEffect(() => {
-    if (once) return
-    once = true
+    if (running) return
+    running = true
     const rt = new lib.Runtime(async function (stmt) {
       switch (stmt.type) {
         case 'clear':
@@ -136,10 +136,11 @@ export default function Stage({ rom }: { rom: Rom }) {
       ])
       setEnded(true)
     }
+    running = false
   }, [])
   function handleTap() {
     if (ended) {
-      once = false
+      running = false
       goTo(<MainMenu />)
     } else if (waiting) {
       events.emit('tap')

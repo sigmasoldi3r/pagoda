@@ -12,3 +12,31 @@
     display: none;
   }
 }
+
+.editor {
+  width: 100%;
+  height: 100%;
+}
+.editor-items {
+  height: 100%;
+}
+.editor-panel {
+  width: 100%;
+}
+@media screen and (max-width: 400px) {
+  .editor-panel {
+    height: 100%;
+  }
+  .editor-items {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.614);
+    z-index: 10;
+  }
+}
+@media screen and (min-width: 401px) {
+  .editor {
+    display: flex;
+  }
+}

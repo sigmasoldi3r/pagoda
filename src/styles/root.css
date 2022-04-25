@@ -34,7 +34,3 @@ code {
 #root code {
   line-height: 1.2rem;
 }
-
-#root > div > div > div.monaco-editor * {
-  font-family: 'Press Start', monospace;
-}

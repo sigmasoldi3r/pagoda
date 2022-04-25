@@ -1,7 +1,7 @@
 import { none, option, some } from '@octantis/option'
 import EventEmitter from 'events'
 import { useEffect } from 'react'
-import useOptionState, { SetStateAction } from '../lib/useOptionState'
+import useOptionState from '../lib/useOptionState'
 import Button from './Button'
 import Input from './Input'
 
@@ -9,6 +9,7 @@ interface State {
   question: string | JSX.Element
   title: string | null
   answer: string
+  hiddenInput: boolean
 }
 
 const events = new EventEmitter()
@@ -16,11 +17,16 @@ const events = new EventEmitter()
 export function DialogPromptProvider() {
   const [state, setState, close] = useOptionState<State>()
   useEffect(() => {
-    const handler = (title: string | null, question: string) => {
+    const handler = (
+      title: string | null,
+      question: string,
+      bool?: boolean
+    ) => {
       setState(s => ({
         title,
         question,
         answer: s.fold('', _ => _.answer),
+        hiddenInput: bool ?? false,
       }))
     }
     events.on('request', handler)
@@ -34,10 +40,14 @@ export function DialogPromptProvider() {
       <div className="dialog">
         <h2>{state.title}</h2>
         <p>{state.question}</p>
-        <Input
-          title="answer"
-          onChange={e => setState({ ...state, answer: e.target.value })}
-        />
+        {state.hiddenInput ? (
+          <hr style={{ width: '100%' }} />
+        ) : (
+          <Input
+            title="answer"
+            onChange={e => setState({ ...state, answer: e.target.value })}
+          />
+        )}
         <div>
           <Button
             onClick={() => {
@@ -61,12 +71,8 @@ export function DialogPromptProvider() {
   ))
 }
 
-export default async function prompt(
-  question: string,
-  title: string | null = null
-): Promise<option<string>> {
-  events.emit('request', title, question)
-  return await new Promise(r => {
+const untilAnswer = () =>
+  new Promise<any>(r => {
     let onReject: () => void
     let onAccept = (answer: string) => {
       events.off('reject', onReject)
@@ -79,4 +85,19 @@ export default async function prompt(
     events.once('accept', onAccept)
     events.once('reject', onReject)
   })
+
+export default async function prompt(
+  question: string,
+  title: string | null = null
+): Promise<option<string>> {
+  events.emit('request', title, question)
+  return await untilAnswer()
+}
+
+export async function promptBoolean(
+  question: string,
+  title: string | null = null
+): Promise<option<string>> {
+  events.emit('request', title, question, true)
+  return await untilAnswer()
 }

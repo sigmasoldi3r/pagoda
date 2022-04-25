@@ -10,7 +10,7 @@ import RomList from './RomList'
 import * as builtins from '../roms'
 import * as db from '../lib/storage/database'
 import { useEffect, useState } from 'react'
-import prompt from '../components/DialogPrompt'
+import prompt, { promptBoolean } from '../components/DialogPrompt'
 
 // Main menu component.
 export default function MainMenu() {
@@ -30,7 +30,9 @@ export default function MainMenu() {
   }
   function importRom() {}
   async function createRom() {}
-  function goToOptions() {}
+  async function goToOptions() {
+    await promptBoolean('Ye?')
+  }
   async function importSampleRom() {
     setLocked(true)
     const rom = builtins.testing

@@ -40,6 +40,8 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
   function goBack() {
     go(<RomList />)
   }
+  function deleteRom() {}
+  function downloadRom() {}
   return (
     <div
       style={{
@@ -77,10 +79,10 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
           <Button onClick={editRom}>
             <Icon src={pen} /> Edit
           </Button>
-          <Button>
+          <Button onClick={deleteRom}>
             <Icon src={trash} /> Delete
           </Button>
-          <Button>
+          <Button onClick={downloadRom}>
             <Icon src={download} /> Download
           </Button>
         </div>

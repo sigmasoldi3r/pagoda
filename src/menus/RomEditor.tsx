@@ -12,6 +12,7 @@ import uploadFileIcon from '../icons/upload_file.png'
 import Input from '../components/Input'
 import prompt from '../components/DialogPrompt'
 import Exp from '../components/Exp'
+import Metric from '../components/Metric'
 
 export interface RomEditorProps {
   rom?: Rom
@@ -214,7 +215,13 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
                         onClick={() => updateEditing(['scripts', key])}
                       >
                         {key}
-                        <Exp>19222</Exp>
+                        <Exp>
+                          <Metric
+                            value={script.length}
+                            spaced
+                            base="byte, bytes"
+                          />
+                        </Exp>
                       </li>
                     ))}
                   </ul>
@@ -235,8 +242,14 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
                           }
                         }}
                       >
-                        {key}{' '}
-                        <small className="exponent">{asset.length} bytes</small>
+                        {key}
+                        <Exp>
+                          <Metric
+                            value={asset.length}
+                            spaced
+                            base="byte, bytes"
+                          />
+                        </Exp>
                       </li>
                     ))}
                   </ul>

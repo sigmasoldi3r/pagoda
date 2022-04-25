@@ -31,6 +31,8 @@ ul.list {
 }
 .editor-items {
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 .editor-panel {
   width: 100%;
@@ -54,6 +56,9 @@ ul.list {
   .editor {
     display: flex;
   }
+}
+.editor-instance {
+  height: 100%;
 }
 
 .icon {

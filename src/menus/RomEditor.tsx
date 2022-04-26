@@ -99,7 +99,7 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     for (const r of rom) {
       const entry = r.scripts[r.entry]
       if (entry != null) {
-        setEditing(['scripts', entry])
+        setEditing(['scripts', r.entry])
         return [entry, 'pagoda']
       }
     }
@@ -143,31 +143,31 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
   useEffect(() => {
     for (const { name, author, entry } of rom) {
       setInputs({ name, author, entry })
-    }
-    if (editor.isEmpty() && ref.current != null) {
-      while (ref.current.firstChild) {
-        if (ref.current.lastChild != null) {
-          ref.current.removeChild(ref.current.lastChild)
+      if (editor.isEmpty() && ref.current != null) {
+        while (ref.current.firstChild) {
+          if (ref.current.lastChild != null) {
+            ref.current.removeChild(ref.current.lastChild)
+          }
         }
-      }
-      const ed = monaco.editor.create(ref.current, {
-        theme: 'vs-dark',
-        model: monaco.editor.createModel(...getInitialContent()),
-        fontFamily: 'Press Start',
-        wordWrap: 'bounded',
-        wrappingStrategy: 'advanced',
-      })
-      ed.layout()
-      setContent(() => ed.getValue())
-      setEditor(last => {
-        for (const editor of last) {
-          editor.dispose()
-        }
-        return ed
-      })
-      ed.onDidChangeModelContent(() => {
+        const ed = monaco.editor.create(ref.current, {
+          theme: 'vs-dark',
+          model: monaco.editor.createModel(...getInitialContent()),
+          fontFamily: 'Press Start',
+          wordWrap: 'bounded',
+          wrappingStrategy: 'advanced',
+        })
+        ed.layout()
         setContent(() => ed.getValue())
-      })
+        setEditor(last => {
+          for (const editor of last) {
+            editor.dispose()
+          }
+          return ed
+        })
+        ed.onDidChangeModelContent(() => {
+          setContent(() => ed.getValue())
+        })
+      }
     }
   }, [rom])
   return (

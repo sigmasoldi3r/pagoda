@@ -1,6 +1,6 @@
 import EventEmitter from 'events'
 import { useEffect, useState } from 'react'
-import { useScreen } from '../components/Screen'
+import { useNav } from '../components/Nav'
 import * as lib from '../grammar/pagoda'
 import { Rom } from '../lib/storage/Rom'
 import MainMenu from './MainMenu'
@@ -55,7 +55,7 @@ const events = new EventEmitter()
 let choices = 0
 let instances = 0
 export default function Stage({ rom }: { rom: Rom }) {
-  const goTo = useScreen()
+  const nav = useNav()
   const [narration, narrate] = useState<JSX.Element[]>([])
   const [choice, setChoice] = useState<JSX.Element | null>(null)
   const [ended, setEnded] = useState(false)
@@ -139,7 +139,7 @@ export default function Stage({ rom }: { rom: Rom }) {
   function handleTap() {
     if (ended) {
       instances = 0
-      goTo(<MainMenu />)
+      nav.pop()
     } else if (waiting) {
       events.emit('tap')
     }

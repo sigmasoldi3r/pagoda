@@ -1,5 +1,5 @@
 import { DialogPromptProvider } from './components/DialogPrompt'
-import Screen from './components/Screen'
+import NavProvider from './components/Nav'
 import MainMenu from './menus/MainMenu'
 import { VirtualFileProvider } from './components/VirtualFile'
 
@@ -8,9 +8,7 @@ function App() {
     <>
       <DialogPromptProvider />
       <VirtualFileProvider />
-      <Screen>
-        <MainMenu />
-      </Screen>
+      <NavProvider init={<MainMenu />} />
     </>
   )
 }

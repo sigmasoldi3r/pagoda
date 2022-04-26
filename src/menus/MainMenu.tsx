@@ -5,7 +5,7 @@ import cog from '../icons/cog_wheel.png'
 import newPackage from '../icons/new_package.png'
 import pagodaLogo from '../logo.png'
 import Icon from '../components/Icon'
-import { useScreen } from '../components/Screen'
+import { useNav } from '../components/Nav'
 import RomList from './RomList'
 import * as builtins from '../roms'
 import * as db from '../lib/storage/database'
@@ -23,9 +23,9 @@ export default function MainMenu() {
       }
     })
   }, [])
-  const go = useScreen()
+  const nav = useNav()
   function openRom() {
-    go(<RomList />)
+    nav.push(<RomList />)
   }
   function importRom() {}
   async function createRom() {}

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import Button from '../components/Button'
-import { useScreen } from '../components/Screen'
+import { useNav } from '../components/Nav'
 import { Rom } from '../lib/storage/Rom'
 import MainMenu from './MainMenu'
 import * as db from '../lib/storage/database'
@@ -18,18 +18,17 @@ async function listRoms(): Promise<db.RomEntry[]> {
 // This menu shows the list of ROMs available.
 export default function RomList() {
   const [roms, setRoms] = useState<db.RomEntry[] | null>(null)
-  const go = useScreen()
+  const nav = useNav()
   function goBack() {
-    go(<MainMenu />)
+    nav.pop()
   }
   function loadRomDetails(rom: db.RomEntry) {
     return () => {
-      go(<RomDetails header={rom} />)
+      nav.push(<RomDetails header={rom} />)
     }
   }
   async function loadRoms() {
     const roms = await listRoms()
-    console.log(roms)
     setRoms(roms)
   }
   useEffect(() => {

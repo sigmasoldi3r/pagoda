@@ -44,7 +44,7 @@ export function DialogPromptProvider() {
           <hr className="wide" />
         ) : (
           <Input
-            title="answer"
+            title=""
             onChange={e => setState({ ...state, answer: e.target.value })}
           />
         )}

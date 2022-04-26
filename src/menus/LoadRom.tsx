@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useRef } from 'react'
 import Console, { useConsole } from '../components/Console'
-import { useScreen } from '../components/Screen'
+import { useNav } from '../components/Nav'
 import { sleep } from '../lib/Coroutines'
 import { Rom } from '../lib/storage/Rom'
 import Stage from './Stage'
@@ -10,10 +10,10 @@ import * as roms from '../roms'
 export default function LoadRom() {
   const log = useConsole()
   const inputRef = useRef<HTMLInputElement>()
-  const goTo = useScreen()
+  const nav = useNav()
   useEffect(() => {
     for (const rom of Rom.fromCurrentURL()) {
-      goTo(<Stage rom={rom} />)
+      nav.push(<Stage rom={rom} />)
     }
   }, [])
   function load() {
@@ -38,7 +38,7 @@ export default function LoadRom() {
       log.println(`By ${rom.author}`)
       log.println(`${Object.keys(rom.scripts).length} script(s) found.`)
       await sleep(1000)
-      goTo(<Stage rom={rom} />)
+      nav.push(<Stage rom={rom} />)
     }
   }
   return (
@@ -68,7 +68,7 @@ export default function LoadRom() {
           e.stopPropagation()
           e.preventDefault()
           console.log('Dumping...')
-          goTo(<Stage rom={roms.testing} />)
+          nav.push(<Stage rom={roms.testing} />)
         }}
       >
         Load sample

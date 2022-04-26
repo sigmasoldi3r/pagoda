@@ -1,4 +1,4 @@
-import { useScreen } from '../components/Screen'
+import { useNav } from '../components/Nav'
 import { Rom } from '../lib/storage/Rom'
 import Stage from './Stage'
 import * as db from '../lib/storage/database'
@@ -17,7 +17,7 @@ import prompt from '../components/DialogPrompt'
 // A simple menu with the details of the ROM.
 // In the future this will contain splash art and such.
 export default function RomDetails({ header }: { header: db.RomEntry }) {
-  const go = useScreen()
+  const nav = useNav()
   const [error, setError] = useState<string | null>(null)
   async function loadRom(): Promise<option<Rom>> {
     const rom = await db.roms.get(header.id)
@@ -30,16 +30,16 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
   }
   async function goToRom() {
     for (const data of await loadRom()) {
-      go(<Stage rom={data} />)
+      nav.push(<Stage rom={data} />)
     }
   }
   async function editRom() {
     for (const data of await loadRom()) {
-      go(<RomEditor rom={data} />)
+      nav.push(<RomEditor rom={data} />)
     }
   }
   function goBack() {
-    go(<RomList />)
+    nav.pop()
   }
   async function deleteRom() {
     for (const _ of await prompt.bool(

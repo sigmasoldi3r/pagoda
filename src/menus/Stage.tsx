@@ -98,7 +98,17 @@ export default function Stage({ rom }: { rom: Rom }) {
             narrate(s => [
               ...s,
               <div className="narration-line">
-                {<Markdown>{text}</Markdown>}
+                {
+                  <Markdown
+                    components={{
+                      a(props) {
+                        return <a {...props} target="_blank" rel="self" />
+                      },
+                    }}
+                  >
+                    {text}
+                  </Markdown>
+                }
               </div>,
             ])
           }

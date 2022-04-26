@@ -12,3 +12,13 @@
     display: none;
   }
 }
+
+.center-layout {
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.flow-center {
+  flex-direction: column;
+}

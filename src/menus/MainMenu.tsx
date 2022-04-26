@@ -10,6 +10,8 @@ import RomList from './RomList'
 import * as builtins from '../roms'
 import * as db from '../lib/storage/database'
 import { useEffect, useState } from 'react'
+import MenuLike from '../components/MenuLike'
+import RomCreationChoice from './RomCreationChoice'
 
 // Main menu component.
 export default function MainMenu() {
@@ -28,7 +30,9 @@ export default function MainMenu() {
     nav.push(<RomList />)
   }
   function importRom() {}
-  async function createRom() {}
+  async function createRom() {
+    nav.push(<RomCreationChoice />)
+  }
   async function goToOptions() {}
   async function importSampleRom() {
     setLocked(true)
@@ -44,45 +48,29 @@ export default function MainMenu() {
     setLocked(false)
   }
   return (
-    <div
-      style={{
-        height: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          flexFlow: 'column',
-          alignItems: 'stretch',
-          justifyContent: 'center',
-          height: '100%',
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <Icon
-            imgStyle={{ left: 'calc(-64px + 16px/2 - 1px)', width: '128px' }}
-            src={pagodaLogo}
-          />
-          <h1>Pagoda Engine</h1>
-        </div>
-        <Button disabled={locked} onClick={openRom}>
-          <Icon src={folder} /> &nbsp;Open a ROM
-        </Button>
-        <Button disabled={locked} onClick={importRom}>
-          <Icon src={diskette} /> &nbsp;Import a ROM file
-        </Button>
-        <Button disabled={alreadyExists || locked} onClick={importSampleRom}>
-          <Icon src={diskette} /> &nbsp;Import sample ROM
-        </Button>
-        <Button disabled={locked} onClick={createRom}>
-          <Icon src={newPackage} /> &nbsp;Create a new ROM
-        </Button>
-        <Button disabled={locked} onClick={goToOptions}>
-          <Icon src={cog} /> &nbsp;Options
-        </Button>
+    <MenuLike>
+      <div style={{ textAlign: 'center' }}>
+        <Icon
+          imgStyle={{ left: 'calc(-64px + 16px/2 - 1px)', width: '128px' }}
+          src={pagodaLogo}
+        />
+        <h1>Pagoda Engine</h1>
       </div>
-    </div>
+      <Button disabled={locked} onClick={openRom}>
+        <Icon src={folder} /> &nbsp;Open a ROM
+      </Button>
+      <Button disabled={locked} onClick={importRom}>
+        <Icon src={diskette} /> &nbsp;Import a ROM file
+      </Button>
+      <Button disabled={alreadyExists || locked} onClick={importSampleRom}>
+        <Icon src={diskette} /> &nbsp;Import sample ROM
+      </Button>
+      <Button disabled={locked} onClick={createRom}>
+        <Icon src={newPackage} /> &nbsp;Create a new ROM
+      </Button>
+      <Button disabled={locked} onClick={goToOptions}>
+        <Icon src={cog} /> &nbsp;Options
+      </Button>
+    </MenuLike>
   )
 }

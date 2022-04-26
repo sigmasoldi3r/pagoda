@@ -1,0 +1,12 @@
+# All these field is serialized into the meta property of the ROM
+name="Survivors"
+author="sigmasoldi3r"
+desc="A survival game in natural environments"
+site="http://github.com/sigmasoldi3r"
+
+# You can add any extra metadata you wish, it will be stored
+# into the ROM and can be read by scripts later.
+[extra]
+test="Yay! I'm a test variable!"
+# Note: It does not require to be under [extra], you can place it
+# wherever you want.

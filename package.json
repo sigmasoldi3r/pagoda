@@ -10,7 +10,8 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "deploy": "gh-pages -d build"
+    "deploy": "gh-pages -d build",
+    "plugin:build": "node buildVSCodePlugin.js"
   },
   "devDependencies": {
     "@craco/craco": "^6.4.3",

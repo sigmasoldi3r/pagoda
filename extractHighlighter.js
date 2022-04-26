@@ -1,0 +1,5 @@
+/*
+  This script will extract the syntax highlight JSON
+  from the javascript source code provided to the
+  monaco editor.
+*/

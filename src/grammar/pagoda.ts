@@ -35,13 +35,13 @@ export class Runtime {
     return rt
   }
 
-  private async tryFind(target: string, value: any) {
+  private propagateVar(target: string, value: any) {
     if (target in this.locals) {
       this.locals[target] = value
       return true
     }
     if (this.parent != null) {
-      return this.parent.tryFind(target, value)
+      return this.parent.propagateVar(target, value)
     }
     return false
   }
@@ -49,7 +49,7 @@ export class Runtime {
   private async assignment(assign: Assign) {
     const target = assign.target
     const value = await this.solve(assign.value)
-    if (this.parent == null || !this.parent.tryFind(target, value)) {
+    if (!this.propagateVar(target, value)) {
       this.locals[target] = value
     }
   }
@@ -201,10 +201,10 @@ export class Runtime {
   }
 
   // "if" type, control flow statement.
-  private async branching(stmt: If): Promise<void> {
-    const result = await this.solve(stmt.expr)
-    if (result) {
-      await this.start(stmt.block)
+  private async branching(stmt: If): Promise<any> {
+    const test = await this.solve(stmt.expr)
+    if (test) {
+      return await this.start(stmt.block)
     }
   }
 
@@ -226,20 +226,34 @@ export class Runtime {
     }
   }
 
+  private scopes() {
+    return {
+      scope: this.locals,
+      _parent: this.parent?.scopes(),
+    }
+  }
+
   /** Starts walking the program tree. */
-  async start(block: Program | Block): Promise<void> {
+  async start(block: Program | Block): Promise<any> {
     for (const stmt of block.statements) {
       const result = await this.listener(stmt)
       switch (result.type) {
+        case 'return':
+          console.log('Breaking context.')
+          return this.solve(result.value)
         case 'assignment':
           await this.assignment(result)
           break
         case 'character':
           await this.declareCharacter(result)
           break
-        case 'if':
-          await this.branching(result)
+        case 'if': {
+          const rb = await this.branching(result)
+          if (rb != null) {
+            return rb
+          }
           break
+        }
         case 'section':
           await this.declareSection(result)
           break

@@ -12,6 +12,7 @@ import * as db from '../lib/storage/database'
 import { useEffect, useState } from 'react'
 import MenuLike from '../components/MenuLike'
 import RomCreationChoice from './RomCreationChoice'
+import uploadFile from '../components/FileUploader'
 
 // Main menu component.
 export default function MainMenu() {
@@ -29,7 +30,11 @@ export default function MainMenu() {
   function openRom() {
     nav.push(<RomList />)
   }
-  function importRom() {}
+  async function importRom() {
+    for (const files of await uploadFile({ directory: true })) {
+      console.log(files[0])
+    }
+  }
   async function createRom() {
     nav.push(<RomCreationChoice />)
   }

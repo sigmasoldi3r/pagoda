@@ -38,6 +38,14 @@ ul {
   padding-bottom: 3rem;
 }
 
+.stage img {
+  margin: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid gray;
+  max-width: calc(100vw - 1rem);
+  max-height: calc(50vh - 1rem);
+}
+
 /* Misc */
 ::-webkit-scrollbar {
   width: 8px;

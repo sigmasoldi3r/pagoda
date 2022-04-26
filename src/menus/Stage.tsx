@@ -54,6 +54,10 @@ const events = new EventEmitter()
 
 let choices = 0
 let instances = 0
+function clearInstances() {
+  instances = 0
+  window.removeEventListener('popstate', clearInstances)
+}
 export default function Stage({ rom }: { rom: Rom }) {
   const nav = useNav()
   const [narration, narrate] = useState<JSX.Element[]>([])
@@ -62,6 +66,7 @@ export default function Stage({ rom }: { rom: Rom }) {
   const [waiting, setWaiting] = useState(false)
   useEffect(() => {
     if (instances++ > 0) return
+    window.addEventListener('popstate', clearInstances)
     const rt = new lib.Runtime(async function (stmt) {
       switch (stmt.type) {
         case 'clear':
@@ -138,7 +143,6 @@ export default function Stage({ rom }: { rom: Rom }) {
   }, [])
   function handleTap() {
     if (ended) {
-      instances = 0
       nav.pop()
     } else if (waiting) {
       events.emit('tap')

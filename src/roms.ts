@@ -23,10 +23,11 @@ section riverActions {
     add -1 to hp
   }
   clear
-  "You're standing next to a river."
-  " - $food of food"
-  " - $hunger of hunger"
-  " - $hp of health"
+  "You're standing [next](http://nextjs.org) to a **big** _river_.
+![](https://pbs.twimg.com/media/D3uprW-W4AAUaoG.png)
+- $food of food
+- $hunger of hunger
+- $hp of health"
   choice "Actions" {
     "Go up the river" {
       call walk
@@ -40,6 +41,7 @@ section riverActions {
       "You gather some food."
       add 1 to food
       "Your inventory contains now $food of food."
+      wait
       call riverActions
     }
     "Eat something" {

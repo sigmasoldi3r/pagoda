@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNav } from '../components/Nav'
 import * as lib from '../grammar/pagoda'
 import { Rom } from '../lib/storage/Rom'
-import MainMenu from './MainMenu'
+import Markdown from 'react-markdown'
 
 interface ChoiceProps {
   done: () => void
@@ -95,7 +95,12 @@ export default function Stage({ rom }: { rom: Rom }) {
         case 'narration':
           {
             const text = await this.getText(stmt)
-            narrate(s => [...s, <div className="narration-line">{text}</div>])
+            narrate(s => [
+              ...s,
+              <div className="narration-line">
+                {<Markdown>{text}</Markdown>}
+              </div>,
+            ])
           }
           break
         case 'choice':
@@ -116,7 +121,6 @@ export default function Stage({ rom }: { rom: Rom }) {
               />
             )
           })
-          console.log('Donnie')
           setChoice(null)
           break
       }
@@ -142,14 +146,14 @@ export default function Stage({ rom }: { rom: Rom }) {
     }
   }, [])
   function handleTap() {
-    if (ended) {
+    if (ended && instances > 0) {
       nav.pop()
     } else if (waiting) {
       events.emit('tap')
     }
   }
   return (
-    <div onClick={handleTap} style={{ minHeight: '100%' }}>
+    <div onClick={handleTap} className="stage">
       {narration.map((n, i) => (
         <div key={`__narration-${i}`}>{n}</div>
       ))}

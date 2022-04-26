@@ -2,13 +2,16 @@ import { Application, Sprite } from 'pixi.js'
 // import spr from './assets/tile32-water.png'
 // import { ui } from './Ui'
 
-const size = document.body.getBoundingClientRect()
-const app = new Application({
-  width: size.width,
-  height: size.height,
-})
+export const createApp = () => {
+  const size = document.body.getBoundingClientRect()
+  const app = new Application({
+    width: size.width,
+    height: size.height,
+  })
 
-document.body.appendChild(app.view)
+  document.body.appendChild(app.view)
+  return app
+}
 
 // app.loader.add('spr', spr).load((loader, res) => {
 //   const lg = new Sprite(res.spr.texture)

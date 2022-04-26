@@ -4,7 +4,12 @@ import App from './App'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
 import reportWebVitals from './reportWebVitals'
 import { createRoot } from 'react-dom/client'
-import './game'
+import { createApp } from './game'
+
+if (process.env.REACT_APP_ENABLE_CANVAS) {
+  const _app = createApp()
+  // TODO: Decide.
+}
 
 const root = createRoot(document.getElementById('root'))
 root.render(

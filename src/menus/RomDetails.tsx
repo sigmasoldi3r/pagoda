@@ -8,7 +8,6 @@ import diskette from '../icons/diskette.png'
 import pen from '../icons/pen.png'
 import trash from '../icons/trash.png'
 import download from '../icons/download.png'
-import RomList from './RomList'
 import { useState } from 'react'
 import { none, option, some } from '@octantis/option'
 import RomEditor from './RomEditor'
@@ -38,9 +37,6 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
       nav.push(<RomEditor rom={data} />)
     }
   }
-  function goBack() {
-    nav.pop()
-  }
   async function deleteRom() {
     for (const _ of await prompt.bool(
       `Are you sure you want to delete this ROM?`
@@ -48,7 +44,7 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
       await db.roms.delete({
         id: header.id,
       })
-      goBack()
+      nav.pop()
     }
   }
   async function downloadRom() {
@@ -101,7 +97,6 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
           </Button>
         </div>
       </div>
-      <Button onClick={goBack}>Go back</Button>
     </div>
   )
 }

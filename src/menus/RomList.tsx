@@ -19,9 +19,6 @@ async function listRoms(): Promise<db.RomEntry[]> {
 export default function RomList() {
   const [roms, setRoms] = useState<db.RomEntry[] | null>(null)
   const nav = useNav()
-  function goBack() {
-    nav.pop()
-  }
   function loadRomDetails(rom: db.RomEntry) {
     return () => {
       nav.push(<RomDetails header={rom} />)
@@ -75,9 +72,6 @@ export default function RomList() {
           )}
         </div>
       )}
-      <Button className="wide" onClick={goBack}>
-        Go back
-      </Button>
     </div>
   )
 }

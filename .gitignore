@@ -10,7 +10,6 @@
 
 # production
 /build
-/vscode-plugin
 
 # misc
 .DS_Store

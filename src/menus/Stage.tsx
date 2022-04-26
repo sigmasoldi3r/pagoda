@@ -4,6 +4,7 @@ import { useNav } from '../components/Nav'
 import * as lib from '../grammar/pagoda'
 import { Rom } from '../lib/storage/Rom'
 import Markdown from 'react-markdown'
+import gfm from 'remark-gfm'
 
 interface ChoiceProps {
   done: () => void
@@ -100,6 +101,7 @@ export default function Stage({ rom }: { rom: Rom }) {
               <div className="narration-line">
                 {
                   <Markdown
+                    remarkPlugins={[gfm]}
                     components={{
                       a(props) {
                         return <a {...props} target="_blank" rel="self" />

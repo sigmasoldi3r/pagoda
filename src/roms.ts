@@ -23,8 +23,14 @@ section riverActions {
     add -1 to hp
   }
   clear
-  "You're standing [next](http://nextjs.org) to a **big** _river_.
-![](https://pbs.twimg.com/media/D3uprW-W4AAUaoG.png)
+  "You're standing next to a big _river_.
+
+  | Attribute|Value|
+  | :---        |  ---:|
+  | food      | $food |
+  | hunger   | $hunger |
+  | health   | $hp |
+
 - $food of food
 - $hunger of hunger
 - $hp of health"

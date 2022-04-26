@@ -18,7 +18,6 @@ export class Nav {
   push(element: JSX.Element) {
     stack.push(element)
     this.update()
-    console.log(`Going to ${stack.length}`, stack)
     window.history.pushState(
       { element: element.type.name, pos: stack.length - 1 },
       ''
@@ -30,13 +29,11 @@ export class Nav {
   }
   /** Pops the stack one element. If no more items, it will go to fallback. */
   pop() {
-    window.history.back()
     if (this.remaining <= 0) {
       stack.push(fallback)
     }
-    const element = stack.pop()
+    window.history.back()
     this.update()
-    return element
   }
   /** Tells if the stack size. */
   get remaining() {

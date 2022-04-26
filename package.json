@@ -10,9 +10,7 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "deploy": "gh-pages -d build",
-    "publish": "yarn deploy",
-    "prepublish": "yarn build"
+    "deploy": "gh-pages -d build"
   },
   "devDependencies": {
     "@craco/craco": "^6.4.3",
@@ -41,6 +39,7 @@
     "react-markdown": "^8.0.3",
     "react-scripts": "5.0.1",
     "react-swipeable": "^6.2.1",
+    "remark-gfm": "^3.0.1",
     "web-vitals": "^0.2.4",
     "workbox-background-sync": "^5.1.3",
     "workbox-broadcast-update": "^5.1.3",

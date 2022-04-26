@@ -89,6 +89,23 @@ plugin`/`('package.json').json({
     ],
   },
 })
+plugin`/`('.vscode').make()`/`('launch.json').json({
+  version: '0.2.0',
+  configurations: [
+    {
+      name: 'Extension',
+      type: 'extensionHost',
+      request: 'launch',
+      runtimeExecutable: '${execPath}',
+      args: ['--extensionDevelopmentPath=${workspaceFolder}'],
+    },
+  ],
+})
+plugin`/`('.vscodeignore').write(`.vscode/**
+.vscode-test/**
+.gitignore
+vsc-extension-quickstart.md
+`)
 
 function pairs(obj, map) {
   return Object.entries(obj).reduce((o, [k, v]) => {

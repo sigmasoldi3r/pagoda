@@ -1,4 +1,6 @@
 /* Elements */
+
+/** -- BUTTONS -- **/
 .btn {
   padding: 1rem;
   padding-right: 2rem;
@@ -8,12 +10,62 @@
   border-radius: 0;
   text-align: left;
 }
-
 .btn-disabled {
   border-style: inset;
   background-color: rgb(169, 169, 169);
   color: rgb(69, 69, 69);
   cursor: not-allowed;
+}
+.btn-alert {
+  border-color: brown;
+  color: brown;
+  background-color: rgb(255, 208, 215);
+}
+.btn-dark {
+  border-color: rgb(137, 137, 137);
+  background-color: rgb(134, 134, 134);
+  color: rgb(0, 0, 0);
+}
+.btn-light {
+  border-color: rgb(0, 60, 123);
+  background-color: rgb(220, 246, 255);
+  color: rgb(0, 60, 123);
+}
+.btn-success {
+  border-color: green;
+  background-color: rgb(196, 238, 196);
+  color: green;
+}
+.btn-thin {
+  border-color: white;
+  background-color: black;
+  color: white;
+}
+.btn-warning {
+  border-color: rgb(125, 98, 0);
+  background-color: rgb(255, 240, 195);
+  color: rgb(125, 98, 0);
+}
+.btn-huge {
+  font-size: 3rem;
+  padding: 3rem;
+  padding-top: 3rem;
+  padding-bottom: 3rem;
+}
+.btn-big {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  font-size: 2rem;
+}
+.btn-small {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.8rem;
+}
+.btn-micro {
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+  font-size: 0.8rem;
 }
 
 .choice.disabled {
@@ -185,7 +237,7 @@ ul {
 }
 
 /* Dialogues */
-.modal-dialog {
+.modal-container {
   display: flex;
   position: absolute;
   width: 100vw;
@@ -193,8 +245,7 @@ ul {
   justify-content: center;
   align-items: center;
 }
-
-.blackout {
+.modal-blackout {
   position: absolute;
   width: 100vw;
   top: 0;
@@ -203,12 +254,27 @@ ul {
   z-index: 15;
   background-color: rgba(34, 34, 34, 0.545);
 }
-
-.dialog {
+.modal {
+  z-index: 100;
+}
+.modal-content {
   background-color: #222;
   z-index: 20;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   border: 1px solid gray;
+}
+
+.dialog {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+}
+.dialog-content {
+  height: 100%;
+  margin: 1rem;
+}
+.dialog-footer {
+  text-emphasis: inherit;
 }

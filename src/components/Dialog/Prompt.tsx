@@ -1,4 +1,4 @@
-import { ReactElement } from 'react'
+import { ReactElement, ReactNode } from 'react'
 import { events, getKey } from '.'
 
 export type SchemaDef = {
@@ -28,7 +28,7 @@ export type TypeResult<T extends Type> = T extends 'string'
 /**
  * Default prompt, asks for a string question.
  */
-export function ask<T extends undefined>(
+export function prompt<T extends undefined>(
   message: ReactElement | string,
   schema?: T
 ): Promise<string>
@@ -37,7 +37,7 @@ export function ask<T extends undefined>(
  * Prompts a single field of a simple type, like a
  * string, a number or a boolean.
  */
-export function ask<T extends Type>(
+export function prompt<T extends Type>(
   message: ReactElement | string,
   schema: T
 ): Promise<TypeResult<T>>
@@ -45,7 +45,7 @@ export function ask<T extends Type>(
 /**
  * Asks for a choice between various options (Dropdown).
  */
-export function ask<T extends string, U extends [T, ...T[]]>(
+export function prompt<T extends string, U extends [T, ...T[]]>(
   message: ReactElement | string,
   schema: U
 ): Promise<U[number]>
@@ -53,42 +53,30 @@ export function ask<T extends string, U extends [T, ...T[]]>(
 /**
  * Generates a complex form that satisfies the passed schema.
  */
-export function ask<T extends SchemaDef>(
+export function prompt<T extends SchemaDef>(
   message: ReactElement | string,
   schema: T
 ): Promise<SchemaResult<T>>
 
 // Implementation.
-export function ask<T>(
+export function prompt<T>(
   message: ReactElement | string,
   schema: any = 'string'
 ): Promise<any> {
   if (typeof schema === 'string') {
     return new Promise(r => {
       const key = getKey()
-      events.emit(
-        'push',
-        <div key={key}>
-          This is a test dialog.
-          <p>message = {message}</p>
-          <button
-            onClick={() => {
-              ask(`${message}.`)
-            }}
-          >
-            Push one
-          </button>
-          <button
-            onClick={() => {
-              events.emit('close', key)
-              r('Yer closerand.')
-            }}
-          >
-            Close me.
-          </button>
-        </div>
-      )
+      events.emit('push', <Prompt key={key}></Prompt>)
     })
   }
   return Promise.resolve(null)
+}
+
+export function Prompt({ children }: { children?: ReactNode }) {
+  return (
+    <div className="dialog">
+      <div className="dialog-content"></div>
+      <div className="dialog-footer"></div>
+    </div>
+  )
 }

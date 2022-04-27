@@ -16,6 +16,7 @@ export interface ButtonProps {
     | 'warning'
     | 'success'
     | 'normal'
+  size?: 'huge' | 'big' | 'normal' | 'small' | 'micro'
 }
 
 export function nothing() {
@@ -32,6 +33,14 @@ export const classVariants = {
   normal: 'btn-normal',
 } as { [K in Exclude<ButtonProps['variant'], undefined>]: string }
 
+export const classSizes = {
+  huge: 'btn-huge',
+  big: 'btn-big',
+  normal: 'btn-normal',
+  small: 'btn-small',
+  micro: 'btn-micro',
+} as { [K in Exclude<ButtonProps['size'], undefined>]: string }
+
 export const baseClassNames = 'btn'
 
 // Custom button component for the engine's UI
@@ -40,6 +49,7 @@ export default function Button({
   disabled,
   children,
   onClick,
+  size = 'normal',
   variant = 'normal',
 }: ButtonProps) {
   return (
@@ -49,6 +59,7 @@ export default function Button({
         baseClassNames,
         disabled ? 'btn-disabled' : '',
         classVariants[variant],
+        classSizes[size],
       ].join(' ')}
       onClick={disabled ? nothing : onClick}
       children={children}

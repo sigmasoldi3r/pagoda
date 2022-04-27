@@ -13,7 +13,8 @@ import { useEffect, useState } from 'react'
 import MenuLike from '../components/MenuLike'
 import RomCreationChoice from './RomCreationChoice'
 import uploadFile from '../components/FileUploader'
-import { ask } from '../components/Dialog'
+import { prompt } from '../components/Dialog'
+import alert from '../components/Dialog/Alert'
 
 // Main menu component.
 export default function MainMenu() {
@@ -40,8 +41,9 @@ export default function MainMenu() {
     nav.push(<RomCreationChoice />)
   }
   async function goToOptions() {
-    const result = await ask('How r u?')
-    console.info('Result:', result)
+    const result = await alert(
+      'Polfabol e una ratata pero ta que no eta 4k 4k 4k'
+    )
   }
   async function importSampleRom() {
     setLocked(true)
@@ -65,6 +67,11 @@ export default function MainMenu() {
         />
         <h1>Pagoda Engine</h1>
       </div>
+      <Button size="huge">huge</Button>
+      <Button size="big">big</Button>
+      <Button size="normal">normal</Button>
+      <Button size="small">small</Button>
+      <Button size="micro">micro</Button>
       <Button disabled={locked} onClick={openRom}>
         <Icon src={folder} /> &nbsp;Open a ROM
       </Button>

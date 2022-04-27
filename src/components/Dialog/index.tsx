@@ -44,10 +44,10 @@ export default function DialogProvider() {
   return (
     <div style={{ zIndex: 100 }}>
       {stack.map(([key, content]) => (
-        <div className="modal-dialog" key={key}>
-          <div className="blackout">&nbsp;</div>
-          <div style={{ zIndex: 20 }}>
-            <div className="dialog">{content}</div>
+        <div className="modal-container" key={key}>
+          <div className="modal-blackout">&nbsp;</div>
+          <div className="modal">
+            <div className="modal-content">{content}</div>
           </div>
         </div>
       ))}

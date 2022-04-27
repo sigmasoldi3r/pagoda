@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react'
 import MenuLike from '../components/MenuLike'
 import RomCreationChoice from './RomCreationChoice'
 import uploadFile from '../components/FileUploader'
+import { ask } from '../components/Dialog'
 
 // Main menu component.
 export default function MainMenu() {
@@ -38,7 +39,10 @@ export default function MainMenu() {
   async function createRom() {
     nav.push(<RomCreationChoice />)
   }
-  async function goToOptions() {}
+  async function goToOptions() {
+    const result = await ask('How r u?')
+    console.info('Result:', result)
+  }
   async function importSampleRom() {
     setLocked(true)
     const rom = builtins.testing
@@ -68,7 +72,7 @@ export default function MainMenu() {
         <Icon src={diskette} /> &nbsp;Import a ROM file
       </Button>
       <Button disabled={alreadyExists || locked} onClick={importSampleRom}>
-        <Icon src={diskette} /> &nbsp;Import sample ROM
+        <Icon src={diskette} /> &nbsp;Import examples
       </Button>
       <Button disabled={locked} onClick={createRom}>
         <Icon src={newPackage} /> &nbsp;Create a new ROM

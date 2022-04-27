@@ -6,13 +6,19 @@ import createPackageIcon from '../icons/new_package.png'
 import packageIcon from '../icons/package.png'
 import { useNav } from '../components/Nav'
 import RomEditor from './RomEditor'
+import uploadFile from '../components/FileUploader'
 
 export default function RomCreationChoice() {
   const nav = useNav()
   function createRom() {
     nav.push(<RomEditor />)
   }
-  function uploadRomFolder() {}
+  async function uploadRomFolder() {
+    console.info('Requesting folder upload...')
+    for (const folder of await uploadFile({ directory: true })) {
+      console.log(folder[0])
+    }
+  }
   return (
     <MenuLike>
       <div style={{ textAlign: 'center' }}>

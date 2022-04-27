@@ -14,6 +14,7 @@ interface State {
 
 const events = new EventEmitter()
 
+/** @deprecated */
 export function DialogPromptProvider() {
   const [state, setState, close] = useOptionState<State>()
   useEffect(() => {
@@ -88,6 +89,7 @@ const untilAnswer = () =>
     events.once('reject', onReject)
   })
 
+/** @deprecated */
 export default async function prompt(
   question: string,
   title: string | null = null
@@ -95,6 +97,8 @@ export default async function prompt(
   events.emit('request', title, question)
   return await untilAnswer()
 }
+
+/** @deprecated */
 prompt.bool = async function promptBool(
   question: string,
   title: string | null = null

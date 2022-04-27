@@ -11,11 +11,14 @@ export interface FileUploadSettings {
 export default function uploadFile(options?: Partial<FileUploadSettings>) {
   const dom = document.createElement('input')
   dom.type = 'file'
+  dom.name = 'files[]'
   if (options?.directory) {
     dom.webkitdirectory = true
   }
   document.body.appendChild(dom)
-  return new Promise<option<FileList>>(r => {
+  return new Promise<
+    option<typeof options extends { directory: true } ? FileList : FileList>
+  >(r => {
     dom.onchange = e => {
       document.body.removeChild(dom)
       const t = e.target as any

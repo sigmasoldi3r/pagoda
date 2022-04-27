@@ -11,7 +11,7 @@ import download from '../icons/download.png'
 import { useState } from 'react'
 import { none, option, some } from '@octantis/option'
 import RomEditor from './RomEditor'
-import prompt from '../components/DialogPrompt'
+import { prompt } from '../components/Dialog'
 
 // A simple menu with the details of the ROM.
 // In the future this will contain splash art and such.
@@ -38,9 +38,11 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
     }
   }
   async function deleteRom() {
-    for (const _ of await prompt.bool(
-      `Are you sure you want to delete this ROM?`
-    )) {
+    if (
+      (
+        await prompt(`Are you sure you want to delete this ROM?`, 'boolean')
+      ).get()
+    ) {
       await db.roms.delete({
         id: header.id,
       })

@@ -15,6 +15,7 @@ import RomCreationChoice from './RomCreationChoice'
 import uploadFile from '../components/FileUploader'
 import { prompt } from '../components/Dialog'
 import alert from '../components/Dialog/Alert'
+import lock from '../components/Dialog/LockDialog'
 
 // Main menu component.
 export default function MainMenu() {

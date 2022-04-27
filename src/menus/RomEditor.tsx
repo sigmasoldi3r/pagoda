@@ -10,9 +10,9 @@ import diskette from '../icons/diskette.png'
 import addTextIcon from '../icons/add_text.png'
 import uploadFileIcon from '../icons/upload_file.png'
 import Input from '../components/Input'
-import prompt from '../components/DialogPrompt'
 import Exp from '../components/Exp'
 import Metric from '../components/Metric'
+import { prompt } from '../components/Dialog'
 
 export interface RomEditorProps {
   rom?: Rom

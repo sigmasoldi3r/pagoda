@@ -40,11 +40,7 @@ export default function MainMenu() {
   async function createRom() {
     nav.push(<RomCreationChoice />)
   }
-  async function goToOptions() {
-    const result = await alert(
-      'Polfabol e una ratata pero ta que no eta 4k 4k 4k'
-    )
-  }
+  async function goToOptions() {}
   async function importSampleRom() {
     setLocked(true)
     const rom = builtins.testing
@@ -67,11 +63,6 @@ export default function MainMenu() {
         />
         <h1>Pagoda Engine</h1>
       </div>
-      <Button size="huge">huge</Button>
-      <Button size="big">big</Button>
-      <Button size="normal">normal</Button>
-      <Button size="small">small</Button>
-      <Button size="micro">micro</Button>
       <Button disabled={locked} onClick={openRom}>
         <Icon src={folder} /> &nbsp;Open a ROM
       </Button>

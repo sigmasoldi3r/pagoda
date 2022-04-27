@@ -7,6 +7,11 @@ import packageIcon from '../icons/package.png'
 import { useNav } from '../components/Nav'
 import RomEditor from './RomEditor'
 import uploadFile from '../components/FileUploader'
+import lock from '../components/Dialog/LockDialog'
+import alert from '../components/Dialog/Alert'
+import { sleep } from '../lib/Coroutines'
+import toml from 'toml'
+import { Rom } from '../lib/storage/Rom'
 
 export default function RomCreationChoice() {
   const nav = useNav()
@@ -14,9 +19,23 @@ export default function RomCreationChoice() {
     nav.push(<RomEditor />)
   }
   async function uploadRomFolder() {
-    console.info('Requesting folder upload...')
     for (const folder of await uploadFile({ directory: true })) {
-      console.log(folder[0])
+      const [done, update] = lock('Processing files...')
+      const rom = new Rom()
+      for (const file of folder) {
+        await sleep(0)
+        update(`Processing ${file.name}...`)
+        if (file.name.toLowerCase() === 'meta.toml') {
+          const data = await file.text()
+          rom.meta = toml.parse(data)
+        } else if (file.name.match(/\.pag(o(da)?)?$/i)) {
+          rom.scripts[file.name.replace(/\.pag(o(da)?)?$/i, '')] =
+            await file.text()
+        }
+      }
+      done()
+      await alert('Import complete!')
+      nav.push(<RomEditor rom={rom} />)
     }
   }
   return (

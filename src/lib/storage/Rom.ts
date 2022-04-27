@@ -29,6 +29,28 @@ export type ProfileDescriptor =
       data: any[]
     }
 
+type Meta = { [key: string]: number | string | undefined | Meta }
+export type Metadata = {
+  manifest?: {
+    storage?: 'save' | 'profile' | 'auto-profile' | 'arcade' | 'none' | 'hybrid'
+    max_profiles?: number
+    max_saves?: number
+    max_arcade_entries?: number
+  } & Meta
+  name: string
+  author: string
+  version: string
+  entry?: string
+  desc?: string
+  site?: string
+  collaborators?: string
+  license?: string
+  contact?: string
+  support?: string
+  issues?: string
+  changelog?: string
+} & Meta
+
 /**
  * Project level information.
  * Contains program, logic and levels.
@@ -86,26 +108,35 @@ export class Rom {
     }
     return some(Rom.fromText(decodeURIComponent(param)))
   }
+  /** @deprecated */
   baseURL = 'http://sigmasoldi3r.github.io/pagoda'
 
   scripts: Record<string, string> = {}
   assets: Record<string, Uint8Array> = {}
+  /** @deprecated */
   name = 'Unnamed'
+  /** @deprecated */
   author = 'Unknown Pagoda fella'
+  /** @deprecated */
   version = [1, 0, 0]
+  /** @deprecated */
   entry = 'init.pag'
   profiles: ProfileDescriptor = {
     type: 'profiles',
     limit: 3,
     data: [],
   }
-  meta: Record<string, any> = {}
+  meta: Metadata = {
+    author: 'Unknown',
+    name: 'No name',
+    version: '1.0.0',
+  }
 
   copy(headers: DeflatedRom | RomHeader): void {
-    this.author = headers.author
-    this.version = headers.version
-    this.name = headers.name
-    this.entry = headers.entry
+    this.meta.author = headers.author
+    this.meta.version = headers.version.join('.')
+    this.meta.name = headers.name
+    this.meta.entry = headers.entry
   }
 
   /** Try parse the script. */
@@ -122,10 +153,10 @@ export class Rom {
   /** Serializes this ROM as a .rom file. */
   encode() {
     const data = {
-      name: this.name,
-      author: this.author,
-      version: this.version,
-      entry: this.entry,
+      name: this.meta.name,
+      author: this.meta.author,
+      version: this.meta.version,
+      entry: this.meta.entry ?? 'init',
       scripts: Object.entries(this.scripts).reduce((o, [name, src]) => {
         o[name] = Buffer.from(pako.deflate(src)).toString('base64')
         return o

@@ -1,4 +1,5 @@
 import { none, option, some } from '@octantis/option'
+import lock from './Dialog/LockDialog'
 
 export interface FileUploadSettings {
   multiple: boolean
@@ -16,12 +17,14 @@ export default function uploadFile(options?: Partial<FileUploadSettings>) {
     dom.webkitdirectory = true
   }
   document.body.appendChild(dom)
+  const [done] = lock('Uploading files...')
   return new Promise<
     option<typeof options extends { directory: true } ? FileList : FileList>
   >(r => {
     dom.onchange = e => {
       document.body.removeChild(dom)
       const t = e.target as any
+      done()
       if (t?.files) {
         r(some(t.files))
       } else {

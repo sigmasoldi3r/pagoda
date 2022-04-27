@@ -52,7 +52,7 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
   const [inputs, setInputs] = useState({ name: '', author: '', entry: '' })
   const [editing, setEditing] = useState<[Editables, string]>([
     'scripts',
-    'init.pag',
+    'init',
   ])
   const [content, setContent] = useState('')
 
@@ -91,15 +91,15 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
         }
         return target
       }
-      return ['scripts', 'unknown.pag']
+      return ['scripts', 'unknown']
     })
   }
 
   function getInitialContent(): [string, string] {
     for (const r of rom) {
-      const entry = r.scripts[r.entry]
+      const entry = r.scripts[r.meta.entry ?? 'init']
       if (entry != null) {
-        setEditing(['scripts', r.entry])
+        setEditing(['scripts', r.meta.entry ?? 'init'])
         return [entry, 'pagoda']
       }
     }
@@ -141,7 +141,10 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     }
   }, [])
   useEffect(() => {
-    for (const { name, author, entry } of rom) {
+    for (const {
+      meta: { name, author, entry: _entry },
+    } of rom) {
+      const entry = _entry ?? 'init'
       setInputs({ name, author, entry })
       if (editor.isEmpty() && ref.current != null) {
         while (ref.current.firstChild) {

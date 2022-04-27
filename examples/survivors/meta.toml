@@ -10,3 +10,9 @@ site="http://github.com/sigmasoldi3r"
 test="Yay! I'm a test variable!"
 # Note: It does not require to be under [extra], you can place it
 # wherever you want.
+
+# The manifest part is an optional, reserverd part that aims
+# to declare special information about the game, like the kind
+# of storage (Eg: Profile vs Saved game vs Arcade).
+[manifest]
+storage="save"

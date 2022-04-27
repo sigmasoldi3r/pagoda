@@ -13,9 +13,6 @@ import { useEffect, useState } from 'react'
 import MenuLike from '../components/MenuLike'
 import RomCreationChoice from './RomCreationChoice'
 import uploadFile from '../components/FileUploader'
-import { prompt } from '../components/Dialog'
-import alert from '../components/Dialog/Alert'
-import lock from '../components/Dialog/LockDialog'
 
 // Main menu component.
 export default function MainMenu() {
@@ -34,7 +31,7 @@ export default function MainMenu() {
     nav.push(<RomList />)
   }
   async function importRom() {
-    for (const files of await uploadFile({ directory: true })) {
+    for (const files of await uploadFile()) {
       console.log(files[0])
     }
   }

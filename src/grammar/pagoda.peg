@@ -9,10 +9,11 @@
   }
   const MakeNumber = value => ({ type: 'number', value: Number(value)  })
   const MakeBinary = (left, operator, right) => ({ type: 'binary', left, operator, right })
-  const MakeCall = (target, params = []) => ({ type: 'call', target, params })
+  const MakeCall = (target, params) => ({ type: 'call', target, params: params ?? [] })
+  const Name = value => ({ type: 'name', value })
 }
 
-program = statements:(_? @(statement /*/ pragma*/) _)* _? {
+program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
   return {
     type: 'program',
     statements,
@@ -58,22 +59,28 @@ section = 'section' _? target:IDENTIFIER _? block:block {
   }
 }
 
-call = 'call' _? target:name params:(_? 'with' @exprList)? {
+call = 'call' _? target:expression params:(_? 'with' _? @exprList)? {
   return MakeCall(target, params)
 }
 
 assignment
-  = 'set' _ target:IDENTIFIER _ 'to' _? value:expression {
+  = 'set' _ target:expression _ 'to' _? value:expression {
     return {
       type: 'assignment',
       target,
       value
     }
-  } / 'add' _? value:expression _? 'to' _ target:IDENTIFIER {
+  } / 'add' _? value:expression _? 'to' _ target:expression {
     return {
       type: 'assignment',
       target,
-      value: MakeBinary({ type: 'name', value: target }, '+', value)
+      value: MakeBinary(target, '+', value)
+  	}
+  } / 'increment' _? target:expression surplus:(_ 'by' @expression)? {
+    return {
+      type: 'assignment',
+      target,
+      value: MakeBinary(target, surplus ?? MakeNumber(1))
     }
   }
 
@@ -127,7 +134,7 @@ choiceCase = match:(string / name) _? then:block {
 
 expression = logicExpr
 
-logicExpr = left:compareExpr _ operator:('and'/'or') _ right:logicExpr {
+logicExpr = left:compareExpr _ operator:BOOLEAN_OP _ right:logicExpr {
   return MakeBinary(left, operator, right)
 } / compareExpr
 
@@ -135,20 +142,33 @@ compareExpr = left:addExpr _? operator:COMPARE_OP _? right:compareExpr {
   return MakeBinary(left, operator, right)
 } / addExpr
 
-addExpr = left:mulExpr _? operator:[+-] _? right:addExpr {
+addExpr = left:mulExpr _? operator:ADDITIVE_OP _? right:addExpr {
   return MakeBinary(left, operator, right)
 } / mulExpr
 
-mulExpr = left:expExpr _? operator:[*/] _? right:mulExpr {
+mulExpr = left:expExpr _? operator:MULTIPLICATIVE_OP _? right:mulExpr {
   return MakeBinary(left, operator, right)
 } / expExpr
 
-expExpr = left:unaryExpr _? operator:('^' / '**') _? right:expExpr {
+expExpr = left:dotExpr _? operator:EXP_OP _? right:expExpr {
   return MakeBinary(left, operator, right)
+} / dotExpr
+
+_dotTailAtom
+  = &'(' @name
+  / name:name { return { type: 'string', text: [name.value] } }
+  / unaryExpr
+
+dotExpr = head:unaryExpr _? tail:("'s" _? @_dotTailAtom)+ {
+  return {
+    type: 'dot',
+    head,
+    tail
+  }
 } / unaryExpr
 
 unaryExpr
-  = operator:(([!~@'¿+-] _?) / (@'not' _)) term:atom {
+  = operator:(@(@UNARY_OPERATOR _?) / @(@'not' _)) term:atom {
     return {
       type: 'unary',
       mode: 'prefix',
@@ -156,7 +176,7 @@ unaryExpr
       term
     }
   }
-  / term:propertyAccess _? operator:('exists') {
+  / term:atom _? operator:('exists') {
     return {
       type: 'unary',
       mode: 'postfix',
@@ -164,49 +184,46 @@ unaryExpr
       term
     }
   }
-  / propertyAccess
-
-propertyAccess "Property access" = left:atom _? "'s" _ right:propertyAccess {
-  return MakeBinary(left, operator, right)
-} / atom
+  / atom
 
 atom
   = call
+  / random
   / choice
+  / tuple
   / string
   / number
   / nothing
   / boolean
-  / name
   / exprWrap
-  / tuple
+  / name
 
 // --------- PARTIALS --------- //
 exprWrap = '(' _? @expression _? ')'
 
-exprList = @(_ @expression)+
+exprList = e:expression t:(SEP @expression)* { return [e, ...t] }
 
 // --------- ATOMS --------- //
 
-tuple "Tuple literal" = '[' elements:exprList ']' {
+tuple "tuple" = '[' _? elements:exprList _? ']' {
   return {
     type: 'tuple',
     elements
   }
 }
 
-random "Random expression"
+random "random expression"
   = 'roll' sides:(@(_ @number))? { return MakeCall({ type: 'name', value: '__rand' }, [sides]) }
   / 'one' _ 'of' _ choices:exprList { return MakeCall({ type: 'name', value: '__rand' }, [choices]) }
 
-block "Program block" = '{' p:program '}' {
+block "block" = '{' p:program '}' {
   return {
     type: 'block',
     statements: p.statements
   }
 }
 
-name "Identifier" = value:IDENTIFIER {
+name "reference" = value:IDENTIFIER {
   return {
     type: 'name',
     value
@@ -218,7 +235,7 @@ string = '"' text:(stringRef / stringEmbedExpr / stringText)* '"' {
     type: 'string',
     text
   }
-} / "'" text:$(!_ .)+ {
+} / ":" text:$(!(_/']'/'}') .)+ {
   return {
     type: 'string',
     text: [text]
@@ -234,11 +251,12 @@ stringText = e:$(!'"' ([^$] / '\\$'))+ {
 }
 
 number
-  = n:$([0-9]+('.'[0-9]+)?) { return MakeNumber(n) }
-  / '1st' { return MakeNumber('1') }
-  / '2nd' { return MakeNumber('2') }
-  / '3rd' { return MakeNumber('3') }
-  / n:$([0-9]+) 'th' { return MakeNumber(n) }
+  = '1st' { return MakeNumber('0') }
+  / '2nd' { return MakeNumber('1') }
+  / '3rd' { return MakeNumber('2') }
+  / '0th' { throw new SyntaxError('Can\'t have a ordinal 0th number') }
+  / n:$([0-9]+) 'th' { return MakeNumber(Number(n)-1) }
+  / n:$([0-9]+('.'[0-9]+)?) { return MakeNumber(n) }
   / expr:exprWrap 'th' { return MakeBinary(expr, '-', MakeNumber('1')) }
 
 boolean = b:BOOLEAN {
@@ -249,16 +267,23 @@ boolean = b:BOOLEAN {
   }
 }
 
-nothing = value:('nothing' / '()' / 'void' / 'nil' / 'null' / 'never' / 'emtpy' / 'invalid') {
-  return {
-    type: 'unit'
-  }
-}
+// - Existential types - //
+nothing = ('nothing' / '[]' / 'void' / 'nil' / 'null' / 'emtpy') { return { type: 'unit' } }
+invalid = 'invalid' { return { type: 'invalid' } }
 
-BOOLEAN = 'true' / 'false' / 'high' / 'low' / 'yes' / 'no' / 'on' / 'off'
-IDENTIFIER = $([A-Za-z_][A-Za-z0-9_]*)
-NL = '\r\n' / '\n' / '\r'
-COMMENT = '#' (!NL .)* NL
-BLANK = [ \t\n\r] / COMMENT
-_ = BLANK+
-COMPARE_OP = '>=' / '>' / '<=' / '<>' / '<' / '=' / 'is' / 'isnt' / 'isn\'t' / 'is not'
+// -- OPERATORS -- //
+COMPARE_OP "comparison operator" = '>=' / '>' / '<=' / '<>' / '<' / '=' / 'is' / 'isnt' / 'isn\'t' / 'is not'
+BOOLEAN_OP "boolean operator" = 'and' / 'or'
+ADDITIVE_OP "addition or subtraction operator" = [+-]
+MULTIPLICATIVE_OP "product or division operator" = [*/]
+EXP_OP "exponential operator" = '^' / '**'
+UNARY_OPERATOR "unary prefix operator" = [!~@¿+-]
+
+// -- ELEMENTAL TOKENS -- //
+BOOLEAN "boolean" = 'true' / 'false' / 'high' / 'low' / 'yes' / 'no' / 'on' / 'off'
+IDENTIFIER "identifier" = $([A-Za-z_][A-Za-z0-9_]*)
+NL "new line" = '\r\n' / '\n' / '\r'
+COMMENT "comment" = '#' (!NL .)* NL
+BLANK "white space" = [ \t\n\r]
+_ = (BLANK / COMMENT)+
+SEP "separator" = (_? ',' _?) / [ \t]

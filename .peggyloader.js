@@ -7,7 +7,7 @@ export default function (source) {
   const options = {
     // Path to the grammar file
     grammarSource: this.resourcePath,
-    cache: false,
+    cache: true,
     dependencies: {},
     exportVar: null,
     format: 'commonjs',

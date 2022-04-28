@@ -1,5 +1,5 @@
 /*
-  Some builtin ROMs, generated from build script at Thu Apr 28 2022 12:20:54 GMT+0200 (hora de verano de Europa central)
+  Some builtin ROMs, generated from build script at Thu Apr 28 2022 16:25:00 GMT+0200 (hora de verano de Europa central)
 */
 import { Rom } from './lib/storage/Rom'
 
@@ -74,7 +74,7 @@ section riverActions {
     }
     "Gather" {
       "You've been looking around for some time,"
-      set Found to one of [1 'avocados] [2 'eggs] [4 'rabbit] [0 'nothing]
+      set Found to one of [1 :avocados] [2 :eggs] [4 :rabbit] [0 :nothing]
       "you've found $(Found's 2nd)!"
       if Found's 1st > 0 {
         "This will procure you with $(Found's 1st) of food."

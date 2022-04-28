@@ -11,15 +11,44 @@ const nothing = new (class Nothing {
   toString() {
     return '<nothing>'
   }
+  *[Symbol.iterator]() {}
 })()
+const invalid = new (class Invalid {
+  toString() {
+    return '<invalid>'
+  }
+})()
+const something = new (class Something {})()
+const valid = new (class Valid {})()
 
 export type Value = any
+
+const noTrace = (...args: any[]) => undefined
+let log = noTrace
+let tracing = false
 
 /**
  * The state machine representing the narrative script runtime.
  */
 export class Runtime {
+  static options = {
+    set trace(to: boolean) {
+      log = to ? console.log.bind(console) : noTrace
+      tracing = to
+    },
+    get trace() {
+      return tracing
+    },
+  }
   private parent: Runtime | null = null
+  private depth = 0
+  private log(...args) {
+    log(
+      ` |  `.repeat(this.depth),
+      ...args,
+      ` ${Math.random().toString().substring(5, 7)}`
+    )
+  }
   locals: Record<string, Value> = {}
   constructor(
     readonly listener: (this: Runtime, input: Statement) => Promise<Statement>
@@ -31,6 +60,7 @@ export class Runtime {
    */
   child() {
     const rt = new Runtime(this.listener)
+    rt.depth = this.depth + 1
     rt.parent = this
     return rt
   }
@@ -47,10 +77,41 @@ export class Runtime {
   }
 
   private async assignment(assign: Assign) {
-    const target = assign.target
-    const value = await this.solve(assign.value)
-    if (!this.propagateVar(target, value)) {
-      this.locals[target] = value
+    this.log('| - Assign variable', assign.target)
+    if (assign.target.type === 'name') {
+      const target = assign.target.value
+      if (
+        target === 'valid' ||
+        target === 'invalid' ||
+        target === 'something' ||
+        target === 'nothing'
+      ) {
+        throw new Error(
+          `Attempting to store a variable named ${target}, which is reserved.`
+        )
+      }
+      const value = await this.solve(assign.value)
+      if (!this.propagateVar(target, value)) {
+        this.locals[target] = value
+      }
+    } else if (assign.target.type === 'dot') {
+      const { head, tail } = assign.target
+      const last = tail[tail.length - 1]
+      const middle = tail.slice(0, tail.length - 1)
+      let target = await this.solve(head)
+      for (const v of middle) {
+        const key = await this.solve(v)
+        target = target[key] ?? nothing
+      }
+      if (target === nothing) {
+        throw new Error(`Attempting to set an object field which was empty.`)
+      }
+      const key = await this.solve(last)
+      target[key] = await this.solve(assign.value)
+    } else {
+      throw new Error(
+        `Can't set a value to something that is a value! (Attempting to "set" something that is not a variable nor a reference to an object field)`
+      )
     }
   }
 
@@ -83,11 +144,27 @@ export class Runtime {
           return left !== right
         case '=':
           return left === right
+        case 'is':
+          if (right === valid) {
+            return left !== invalid
+          } else if (right === something) {
+            return left !== nothing
+          }
+          return left === right
+        case 'isnt':
+        case "isn't":
+        case 'is not':
+          if (right === valid) {
+            return left === invalid
+          } else if (right === something) {
+            return left === nothing
+          }
+          return left !== right
         case '**':
           return Math.pow(left, right)
       }
     }
-    return nothing
+    return invalid
   }
 
   // Solve unary expressions
@@ -106,7 +183,7 @@ export class Runtime {
           return +term
       }
     }
-    return nothing
+    return invalid
   }
 
   // Solve the call procedure to a function (AKA a "section")
@@ -122,6 +199,7 @@ export class Runtime {
         `Attempting to call a non-function value "${expr.target.value}"`
       )
     }
+    this.log('| - CALL', expr.target)
     return await fn(...expr.params)
   }
 
@@ -145,6 +223,20 @@ export class Runtime {
     return result
   }
 
+  async solveDot(expr: Expression): Promise<Value> {
+    if (expr.type === 'dot') {
+      let value = await this.solve(expr.head)
+      for (const e of expr.tail) {
+        if (value === nothing) {
+          return nothing
+        }
+        value = value[await this.solve(e)] ?? nothing
+      }
+      return value
+    }
+    return invalid
+  }
+
   /**
    * Resolve asynchronously any expression.
    */
@@ -164,6 +256,12 @@ export class Runtime {
         return expr.value
       case 'tuple':
         return await this.solveTuple(expr)
+      case 'dot':
+        return await this.solveDot(expr)
+      case 'unit':
+        return nothing
+      case 'invalid':
+        return invalid
     }
     return nothing
   }
@@ -221,11 +319,13 @@ export class Runtime {
 
   // A character declaration, which assigns and creates the character.
   private async declareCharacter(char: CharacterDeclaration): Promise<void> {
+    this.log('| - Declare character', char.name)
     this.locals[char.target] = new Character(await this.solve(char.name))
   }
 
   // Declares a new section and stores it as a local.
   private async declareSection(sect: Section): Promise<void> {
+    this.log('| - Resolving section', sect.target)
     this.locals[sect.target] = async (...args) => {
       // Create a local runtime.
       const local = this.child()
@@ -235,6 +335,7 @@ export class Runtime {
       }
       return await local.start(sect.block)
     }
+    this.log('| - Resolved  section', sect.target)
   }
 
   private scopes() {
@@ -246,32 +347,36 @@ export class Runtime {
 
   /** Starts walking the program tree. */
   async start(block: Program | Block): Promise<any> {
-    for (const stmt of block.statements) {
-      const result = await this.listener(stmt)
-      switch (result.type) {
-        case 'return':
-          console.log('Breaking context.')
-          return this.solve(result.value)
-        case 'assignment':
-          await this.assignment(result)
-          break
-        case 'character':
-          await this.declareCharacter(result)
-          break
-        case 'if': {
-          const rb = await this.branching(result)
-          if (rb != null) {
-            return rb
+    this.log('/- Run Block -\\')
+    try {
+      for (const stmt of block.statements) {
+        const result = await this.listener(stmt)
+        switch (result.type) {
+          case 'return':
+            return this.solve(result.value)
+          case 'assignment':
+            await this.assignment(result)
+            break
+          case 'character':
+            await this.declareCharacter(result)
+            break
+          case 'if': {
+            const rb = await this.branching(result)
+            if (rb != null) {
+              return rb
+            }
+            break
           }
-          break
+          case 'section':
+            await this.declareSection(result)
+            break
+          case 'call':
+            await this.solve(result)
+            break
         }
-        case 'section':
-          await this.declareSection(result)
-          break
-        case 'call':
-          await this.solve(result)
-          break
       }
+    } finally {
+      this.log('\\- End Block -/')
     }
   }
 }
@@ -318,7 +423,7 @@ export interface Call extends Node<'call'> {
 }
 
 export interface Assign extends Node<'assignment'> {
-  target: IDENTIFIER
+  target: Expression
   value: Expression
 }
 
@@ -349,6 +454,7 @@ export interface ChoiceCase extends Node<'case'> {
 
 export type Expression =
   | ({ left: Expression; operator: string; right: Expression } & Node<'binary'>)
+  | ({ head: Expression; tail: Expression[] } & Node<'dot'>)
   | ({
       mode: 'postfix' | 'prefix'
       operator: string
@@ -356,7 +462,7 @@ export type Expression =
     } & Node<'unary'>)
   | Atom
 
-export type Atom = Call | Choice | Str | Num | Name | Unit | Tuple
+export type Atom = Call | Choice | Str | Num | Name | Unit | Tuple | Invalid
 
 export interface Block extends Node<'block'> {
   statements: Statement[]
@@ -381,6 +487,8 @@ export interface Tuple extends Node<'tuple'> {
 }
 
 export type Unit = Node<'unit'>
+
+export type Invalid = Node<'invalid'>
 
 // Primitives
 export type IDENTIFIER = string

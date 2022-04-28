@@ -68,6 +68,7 @@ export default function Stage({ rom }: { rom: Rom }) {
   useEffect(() => {
     if (instances++ > 0) return
     window.addEventListener('popstate', clearInstances)
+    lib.Runtime.options.trace = true
     const rt = new lib.Runtime(async function (stmt) {
       switch (stmt.type) {
         case 'clear':

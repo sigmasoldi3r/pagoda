@@ -67,7 +67,7 @@ section riverActions {
     }
     "Gather" {
       "You've been looking around for some time,"
-      set Found to one of [1 'avocados] [2 'eggs] [4 'rabbit] [0 'nothing]
+      set Found to one of [1 :avocados] [2 :eggs] [4 :rabbit] [0 :nothing]
       "you've found $(Found's 2nd)!"
       if Found's 1st > 0 {
         "This will procure you with $(Found's 1st) of food."

@@ -91,12 +91,12 @@ section riverActions {
           "As much as I can" {
             if Food > Hunger {
               "You've eaten until you've felt satisfied"
-              set Hunger to 0
               set Food to Food - Hunger
+              set Hunger to 0
             } else {
               "You've eaten until there was nothing left"
-              set Food to 0
               set Hunger to Hunger - Food
+              set Food to 0
             }
           }
         }

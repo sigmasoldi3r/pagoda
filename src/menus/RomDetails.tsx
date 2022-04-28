@@ -15,13 +15,13 @@ import { prompt } from '../components/Dialog'
 
 // A simple menu with the details of the ROM.
 // In the future this will contain splash art and such.
-export default function RomDetails({ header }: { header: db.RomEntry }) {
+export default function RomDetails({ header: info }: { header: db.RomEntry }) {
   const nav = useNav()
   const [error, setError] = useState<string | null>(null)
   async function loadRom(): Promise<option<Rom>> {
-    const rom = await db.roms.get(header.id)
+    const rom = await db.roms.get(info.id)
     if (rom == null) {
-      setError(`Failed to retrieve ${header.id} ROM!`)
+      setError(`Failed to retrieve ${info.id} ROM!`)
       return none()
     } else {
       return some(Rom.decode((rom as any).data))
@@ -38,13 +38,9 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
     }
   }
   async function deleteRom() {
-    if (
-      (
-        await prompt(`Are you sure you want to delete this ROM?`, 'boolean')
-      ).get()
-    ) {
+    if (await prompt(`Are you sure you want to delete this ROM?`, 'boolean')) {
       await db.roms.delete({
-        id: header.id,
+        id: info.id,
       })
       nav.pop()
     }
@@ -65,17 +61,15 @@ export default function RomDetails({ header }: { header: db.RomEntry }) {
     >
       <div>
         <h2>ROM Details</h2>
-        <h3>{header.name}</h3>
+        <h3>{info.meta.name}</h3>
         <hr />
-        <p>Author: {header.author}</p>
-        <p>Version: {header.version.join('.')}</p>
+        <p>Author: {info.meta.author}</p>
+        <p>Version: {info.meta.version}</p>
         <div style={{ color: 'red' }}>{error}</div>
-        <small>
-          This rom contains:
-          <br />
-          {header.scriptNames.length} script(s) and {header.assetNames.length}{' '}
-          asset(s)
-        </small>
+        <p>{info.meta.desc}</p>
+        {info.meta.contact != null ? (
+          <a href={`mailto:${info.meta.contact}`}>{info.meta.contact}</a>
+        ) : null}
         <hr />
         <div
           style={{

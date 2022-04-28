@@ -3,6 +3,7 @@ name="Survivors"
 author="sigmasoldi3r"
 desc="A survival game in natural environments"
 site="http://github.com/sigmasoldi3r"
+version="1.0.0"
 
 # You can add any extra metadata you wish, it will be stored
 # into the ROM and can be read by scripts later.

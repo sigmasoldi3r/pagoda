@@ -138,19 +138,24 @@ export default function Stage({ rom }: { rom: Rom }) {
       }
       return stmt
     })
-    const result = rom.getScript(rom.entry)
+    const result = rom.getScript('init')
     if (result.success()) {
       rt.start(result.value).then(() => {
         setEnded(true)
       })
     } else {
-      const text = rom.scripts[rom.entry]
+      const text = rom.scripts[rom.meta.entry ?? 'init']
+      const err = result.error as any
       narrate(s => [
         ...s,
         <div style={{ color: 'red' }}>
           <h2>Fatal Error</h2>
           <pre>
-            {(result.error as any).format([{ source: rom.entry, text }])}
+            {err.format
+              ? (result.error as any).format([
+                  { source: rom.meta.entry ?? 'init', text },
+                ])
+              : err.message}
           </pre>
         </div>,
       ])

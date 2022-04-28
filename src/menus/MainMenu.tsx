@@ -13,6 +13,8 @@ import { useEffect, useState } from 'react'
 import MenuLike from '../components/MenuLike'
 import RomCreationChoice from './RomCreationChoice'
 import uploadFile from '../components/FileUploader'
+import { prompt } from '../components/Dialog'
+import alert from '../components/Dialog/Alert'
 
 // Main menu component.
 export default function MainMenu() {
@@ -20,7 +22,7 @@ export default function MainMenu() {
   const [alreadyExists, setAlreadyExists] = useState(true)
   useEffect(() => {
     db.roms.getAll().then(all => {
-      const one = all.find(row => row.name === builtins.testing.name)
+      const one = all.find(row => row.name === builtins.Survivors.meta.name)
       if (one == null) {
         setAlreadyExists(false)
       }
@@ -38,13 +40,21 @@ export default function MainMenu() {
   async function createRom() {
     nav.push(<RomCreationChoice />)
   }
-  async function goToOptions() {}
+  async function goToOptions() {
+    if (await prompt('Clear all ROMs?', 'boolean')) {
+      const list = await db.roms.getAll()
+      for (const rom of list) {
+        await db.roms.delete(rom.id)
+      }
+      alert(`Deleted ${list.length} ROMs!`)
+    }
+  }
   async function importSampleRom() {
     setLocked(true)
-    const rom = builtins.testing
+    const rom = builtins.Survivors
     const binary = rom.encode()
     await db.roms.add({
-      name: rom.name,
+      name: rom.meta.name,
       data: binary,
     })
     console.log('Done!')

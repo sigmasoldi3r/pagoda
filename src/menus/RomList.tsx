@@ -65,7 +65,7 @@ export default function RomList() {
                   key={`_rom${i}`}
                   className="entry"
                 >
-                  {rom.name} v{rom.version.join('.')} by {rom.author}
+                  {rom.meta.name} v{rom.meta.version} by {rom.meta.author}
                 </div>
               ))}
             </>

@@ -47,6 +47,15 @@ export function prompt<T extends Type>(
 ): Future<TypeResult<T>>
 
 /**
+ * Displays a confirmation prompt, always resolves to
+ * either true or false.
+ */
+export function prompt<T extends string>(
+  message: ReactElement | string,
+  schema: 'boolean'
+): Promise<boolean>
+
+/**
  * Asks for a choice between various options (Dropdown).
  */
 export function prompt<T extends string, U extends [T, ...T[]]>(
@@ -66,7 +75,7 @@ export function prompt<T extends SchemaDef>(
 export function prompt<T>(
   message: ReactElement | string,
   schema: any = 'string'
-): Future<any> {
+): any {
   if (schema === 'string') {
     return new Promise(r => {
       const key = getKey()
@@ -125,7 +134,7 @@ export function prompt<T>(
       const key = getKey()
       function done(value?: boolean) {
         events.emit('close', key)
-        r(some(value))
+        r(value)
       }
       events.emit(
         'push',

@@ -34,8 +34,8 @@ export default function LoadRom() {
     log.println(`Parsing sources...`)
     if (src != null) {
       const rom = Rom.decode(src)
-      log.println(`Loading ${rom.name}`)
-      log.println(`By ${rom.author}`)
+      log.println(`Loading ${rom.meta.name}`)
+      log.println(`By ${rom.meta.author}`)
       log.println(`${Object.keys(rom.scripts).length} script(s) found.`)
       await sleep(1000)
       nav.push(<Stage rom={rom} />)
@@ -58,7 +58,7 @@ export default function LoadRom() {
           e.stopPropagation()
           e.preventDefault()
           console.log('Dumping...')
-          roms.testing.downloadAsFile()
+          roms.Survivors.downloadAsFile()
         }}
       >
         Dump sample
@@ -68,7 +68,7 @@ export default function LoadRom() {
           e.stopPropagation()
           e.preventDefault()
           console.log('Dumping...')
-          nav.push(<Stage rom={roms.testing} />)
+          nav.push(<Stage rom={roms.Survivors} />)
         }}
       >
         Load sample

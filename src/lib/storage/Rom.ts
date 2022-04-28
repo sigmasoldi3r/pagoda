@@ -4,11 +4,11 @@ import { parse } from '../../grammar/pagoda.peg'
 import * as lib from '../../grammar/pagoda'
 import { trying } from '../Result'
 
-export type RomHeader = Pick<Rom, 'author' | 'name' | 'version' | 'entry'> & {
+export type RomInfo = Pick<Rom, 'meta' | 'localID' | 'profiles'> & {
   scriptNames: string[]
   assetNames: string[]
 }
-export type DeflatedRom = Omit<RomHeader, 'scriptNames' | 'assetNames'> & {
+export type PartialRom = Omit<Rom, 'scriptNames' | 'assetNames'> & {
   scripts: Record<string, Uint8Array>
   assets: Record<string, Uint8Array>
 }
@@ -72,23 +72,26 @@ export class Rom {
   }
 
   /** Returns a partially decoded ROM where binary data is not yet inflated. */
-  static inflate(data: Uint8Array): DeflatedRom {
+  static inflate(data: Uint8Array): PartialRom {
     const inflated = pako.inflate(data)
     const decoded = Buffer.from(inflated).toString()
     const raw = JSON.parse(decoded)
     for (const [key, content] of Object.entries(raw.scripts)) {
       raw.scripts[key] = Buffer.from(content as string, 'base64')
     }
+    for (const [key, content] of Object.entries(raw.assets)) {
+      raw.assets[key] = Buffer.from(content as string, 'base64')
+    }
     return raw
   }
 
   /** Partial decode only of the header data. */
-  static decodeHeaders(data: Uint8Array): RomHeader {
-    const partial = Rom.inflate(data) as Partial<DeflatedRom>
+  static decodeHeaders(data: Uint8Array): RomInfo {
+    const partial = Rom.inflate(data) as Partial<PartialRom>
     const { scripts, assets } = partial
     delete partial.scripts
     delete partial.assets
-    const header = partial as RomHeader
+    const header = partial as RomInfo
     header.assetNames = Object.keys(assets ?? {})
     header.scriptNames = Object.keys(scripts ?? {})
     return header
@@ -113,14 +116,7 @@ export class Rom {
 
   scripts: Record<string, string> = {}
   assets: Record<string, Uint8Array> = {}
-  /** @deprecated */
-  name = 'Unnamed'
-  /** @deprecated */
-  author = 'Unknown Pagoda fella'
-  /** @deprecated */
-  version = [1, 0, 0]
-  /** @deprecated */
-  entry = 'init.pag'
+  localID?: number
   profiles: ProfileDescriptor = {
     type: 'profiles',
     limit: 3,
@@ -132,19 +128,20 @@ export class Rom {
     version: '1.0.0',
   }
 
-  copy(headers: DeflatedRom | RomHeader): void {
-    this.meta.author = headers.author
-    this.meta.version = headers.version.join('.')
-    this.meta.name = headers.name
-    this.meta.entry = headers.entry
+  copy(partial: PartialRom | RomInfo): void {
+    this.meta.author = partial.meta.author
+    this.meta.version = partial.meta.version
+    this.meta.name = partial.meta.name
+    this.meta.entry = partial.meta.entry
   }
 
   /** Try parse the script. */
   getScript(name: string) {
+    console.info(name, this.meta.entry, this.scripts)
     return trying(() => {
-      const file = this.scripts[name]
+      const file = this.scripts[name ?? 'init']
       if (file == null) {
-        throw new Error(`No file named ${file}`)
+        throw new Error(`No file named ${name}`)
       }
       return parse<lib.Program>(file, { grammarSource: name })
     })
@@ -153,10 +150,11 @@ export class Rom {
   /** Serializes this ROM as a .rom file. */
   encode() {
     const data = {
-      name: this.meta.name,
-      author: this.meta.author,
-      version: this.meta.version,
-      entry: this.meta.entry ?? 'init',
+      meta: this.meta,
+      assets: Object.entries(this.assets).reduce((o, [name, src]) => {
+        o[name] = Buffer.from(pako.deflate(src)).toString('base64')
+        return o
+      }, {}),
       scripts: Object.entries(this.scripts).reduce((o, [name, src]) => {
         o[name] = Buffer.from(pako.deflate(src)).toString('base64')
         return o
@@ -168,7 +166,7 @@ export class Rom {
   downloadAsFile() {
     const a = document.createElement('a')
     a.href = `data:application/octet-stream;base64,${this.serializeBase64()}`
-    a.download = this.name + '.rom'
+    a.download = this.meta.name + '.rom'
     a.style.display = 'none'
     document.body.appendChild(a)
     a.click()

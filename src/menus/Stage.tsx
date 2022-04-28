@@ -68,7 +68,6 @@ export default function Stage({ rom }: { rom: Rom }) {
   useEffect(() => {
     if (instances++ > 0) return
     window.addEventListener('popstate', clearInstances)
-    lib.Runtime.options.trace = true
     const rt = new lib.Runtime(async function (stmt) {
       switch (stmt.type) {
         case 'clear':
@@ -139,13 +138,6 @@ export default function Stage({ rom }: { rom: Rom }) {
       }
       return stmt
     })
-    rt.locals.__rand = function random(target: number | any[]) {
-      if (typeof target === 'number') {
-        return ((Math.random() * target) >> 0) + 1
-      } else {
-        return target[(Math.random() * target.length) >> 0]
-      }
-    }
     const result = rom.getScript('init')
     if (result.success()) {
       rt.start(result.value).then(() => {

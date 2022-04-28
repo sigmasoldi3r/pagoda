@@ -7,6 +7,10 @@ export class Character {
   constructor(readonly name: string, readonly color = 0xffffff) {}
 }
 
+export class ScriptError extends Error {}
+
+export class RuntimeError extends ScriptError {}
+
 const nothing = new (class Nothing {
   toString() {
     return '<nothing>'
@@ -49,7 +53,18 @@ export class Runtime {
       ` ${Math.random().toString().substring(5, 7)}`
     )
   }
-  locals: Record<string, Value> = {}
+  locals: Record<string, Value> = {
+    __rand_int(target: number) {
+      return ((Math.random() * target) >> 0) + 1
+    },
+    __rand_array(target: any[]) {
+      if (target === nothing || target === invalid) {
+        throw new RuntimeError(`Can't perform random pick on ${target}!`)
+      }
+      const key = (Math.random() * target.length) >> 0
+      return target[key] ?? nothing
+    },
+  }
   constructor(
     readonly listener: (this: Runtime, input: Statement) => Promise<Statement>
   ) {}
@@ -200,7 +215,11 @@ export class Runtime {
       )
     }
     this.log('| - CALL', expr.target)
-    return await fn(...expr.params)
+    const params = [] as any[]
+    for (const par of expr.params) {
+      params.push(await this.solve(par))
+    }
+    return await fn(...params)
   }
 
   // Attempts to retrieve a local expression or a parent one.
@@ -331,7 +350,7 @@ export class Runtime {
       const local = this.child()
       // Store arguments as top-level locals.
       for (let i = 0; i < args.length; i++) {
-        local.locals[`_${i}`] = await local.solve(args[i])
+        local.locals[`_${i}`] = args[i]
       }
       return await local.start(sect.block)
     }

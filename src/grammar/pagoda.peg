@@ -11,6 +11,7 @@
   const MakeBinary = (left, operator, right) => ({ type: 'binary', left, operator, right })
   const MakeCall = (target, params) => ({ type: 'call', target, params: params ?? [] })
   const Name = value => ({ type: 'name', value })
+  const Tuple = elements => ({ type: 'tuple', elements })
 }
 
 program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
@@ -206,15 +207,16 @@ exprList = e:expression t:(SEP @expression)* { return [e, ...t] }
 // --------- ATOMS --------- //
 
 tuple "tuple" = '[' _? elements:exprList _? ']' {
-  return {
-    type: 'tuple',
-    elements
-  }
+  return Tuple(elements) 
 }
 
 random "random expression"
-  = 'roll' sides:(@(_ @number))? { return MakeCall({ type: 'name', value: '__rand' }, [sides]) }
-  / 'one' _ 'of' _ choices:exprList { return MakeCall({ type: 'name', value: '__rand' }, [choices]) }
+  = 'roll' sides:(@(_ @number))? {
+    return MakeCall({ type: 'name', value: '__rand_int' }, [Tuple(sides)])
+  }
+  / 'one' _ 'of' _ choices:exprList {
+    return MakeCall({ type: 'name', value: '__rand_array' }, [Tuple(choices)])
+  }
 
 block "block" = '{' p:program '}' {
   return {

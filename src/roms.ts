@@ -4,7 +4,15 @@
 import { Rom } from './lib/storage/Rom'
 
 export const Survivors = new Rom()
-Survivors.meta = {"name":"Survivors","author":"sigmasoldi3r","desc":"A survival game in natural environments","site":"http://github.com/sigmasoldi3r","version":"1.0.0","extra":{"test":"Yay! I'm a test variable!"},"manifest":{"storage":"save"}}
+Survivors.meta = {
+  name: 'Survivors',
+  author: 'sigmasoldi3r',
+  desc: 'A survival game in natural environments',
+  site: 'http://github.com/sigmasoldi3r',
+  version: '1.0.0',
+  extra: { test: "Yay! I'm a test variable!" },
+  manifest: { storage: 'save' },
+}
 Survivors.scripts['init'] = `###
 # Example project: Survivors
 # A simple survival game about wandering in
@@ -74,7 +82,7 @@ section riverActions {
     }
     "Gather" {
       "You've been looking around for some time,"
-      set Found to one of [1 :avocados] [2 :eggs] [4 :rabbit] [0 :nothing]
+      set Found to one of [1 :avocados] [2 :eggs] [4 "a rabbit"] [0 :nothing]
       "you've found $(Found's 2nd)!"
       if Found's 1st > 0 {
         "This will procure you with $(Found's 1st) of food."
@@ -107,5 +115,3 @@ section riverActions {
 # This is the entry point!
 call riverActions
 `
-
-

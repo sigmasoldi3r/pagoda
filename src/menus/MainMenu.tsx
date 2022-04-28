@@ -51,12 +51,7 @@ export default function MainMenu() {
   }
   async function importSampleRom() {
     setLocked(true)
-    const rom = builtins.Survivors
-    const binary = rom.encode()
-    await db.roms.add({
-      name: rom.meta.name,
-      data: binary,
-    })
+    await builtins.Survivors.persist()
     console.log('Done!')
     setAlreadyExists(true)
     db.roms.consoleTable()

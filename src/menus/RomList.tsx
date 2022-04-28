@@ -1,31 +1,19 @@
 import { useEffect, useState } from 'react'
-import Button from '../components/Button'
 import { useNav } from '../components/Nav'
-import { Rom } from '../lib/storage/Rom'
-import MainMenu from './MainMenu'
-import * as db from '../lib/storage/database'
+import { Rom, RomInfo } from '../lib/storage/Rom'
 import RomDetails from './RomDetails'
-
-async function listRoms(): Promise<db.RomEntry[]> {
-  const result = (await db.roms.getAll()) as db.RomDBEntity[]
-  return result.map(r => {
-    const header = Rom.decodeHeaders(r.data) as any
-    header.id = r.id
-    return header
-  })
-}
 
 // This menu shows the list of ROMs available.
 export default function RomList() {
-  const [roms, setRoms] = useState<db.RomEntry[] | null>(null)
+  const [roms, setRoms] = useState<RomInfo[] | null>(null)
   const nav = useNav()
-  function loadRomDetails(rom: db.RomEntry) {
+  function loadRomDetails(rom: RomInfo) {
     return () => {
       nav.push(<RomDetails header={rom} />)
     }
   }
   async function loadRoms() {
-    const roms = await listRoms()
+    const roms = await Rom.fromDatabase()
     setRoms(roms)
   }
   useEffect(() => {

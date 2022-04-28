@@ -1,5 +1,5 @@
 import { useNav } from '../components/Nav'
-import { Rom } from '../lib/storage/Rom'
+import { Rom, RomInfo } from '../lib/storage/Rom'
 import Stage from './Stage'
 import * as db from '../lib/storage/database'
 import Button from '../components/Button'
@@ -13,18 +13,24 @@ import { none, option, some } from '@octantis/option'
 import RomEditor from './RomEditor'
 import { prompt } from '../components/Dialog'
 
+function getOrDie<T>(what: T | undefined): T {
+  if (what == null) throw new Error(`Invalid ROM!`)
+  return what
+}
+
 // A simple menu with the details of the ROM.
 // In the future this will contain splash art and such.
-export default function RomDetails({ header: info }: { header: db.RomEntry }) {
+export default function RomDetails({ header: info }: { header: RomInfo }) {
+  const id = getOrDie(info.localID)
   const nav = useNav()
   const [error, setError] = useState<string | null>(null)
   async function loadRom(): Promise<option<Rom>> {
-    const rom = await db.roms.get(info.id)
+    const [rom] = await Rom.fromDatabase(id)
     if (rom == null) {
-      setError(`Failed to retrieve ${info.id} ROM!`)
+      setError(`Failed to retrieve ${id} ROM!`)
       return none()
     } else {
-      return some(Rom.decode((rom as any).data))
+      return some(Rom.decode(rom.data, id))
     }
   }
   async function goToRom() {
@@ -39,9 +45,7 @@ export default function RomDetails({ header: info }: { header: db.RomEntry }) {
   }
   async function deleteRom() {
     if (await prompt(`Are you sure you want to delete this ROM?`, 'boolean')) {
-      await db.roms.delete({
-        id: info.id,
-      })
+      await db.roms.delete({ id })
       nav.pop()
     }
   }

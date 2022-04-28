@@ -181,6 +181,16 @@ ul {
   width: 100%;
 }
 @media screen and (max-width: 400px) {
+  .editor-items-open {
+    margin-left: 0;
+    transition: margin-left 0.25s;
+    transition-timing-function: ease-in-out;
+  }
+  .editor-items-closed {
+    margin-left: -100vw;
+    transition: margin-left 0.25s;
+    transition-timing-function: ease-in-out;
+  }
   .editor-panel {
     height: 100%;
   }

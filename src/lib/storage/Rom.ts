@@ -3,10 +3,10 @@ import { option, none, some } from '@octantis/option'
 import { parse } from '../../grammar/pagoda.peg'
 import * as lib from '../../grammar/pagoda'
 import { trying } from '../Result'
+import { RomDBEntity, roms } from './database'
 
 export type RomInfo = Pick<Rom, 'meta' | 'localID' | 'profiles'> & {
-  scriptNames: string[]
-  assetNames: string[]
+  data: Uint8Array
 }
 export type PartialRom = Omit<Rom, 'scriptNames' | 'assetNames'> & {
   scripts: Record<string, Uint8Array>
@@ -60,10 +60,31 @@ export type Metadata = {
  * Then invoke toURL(), append as http://sigmasoldi3r.github.io/pagoda?rom=the-generated-url-here
  */
 export class Rom {
+  /** Recovers one or all ROMs based on the ID, if provided. */
+  static async fromDatabase(id?: number) {
+    if (id != null) {
+      const result = (await roms.get(id)) as RomDBEntity
+      const header = Rom.decodeHeaders(result.data)
+      header.localID = result.id
+      header.data = result.data
+      return [header]
+    }
+    const result = (await roms.getAll()) as RomDBEntity[]
+    return result.map(r => {
+      const header = Rom.decodeHeaders(r.data)
+      header.localID = r.id
+      return header
+    })
+  }
+
   /** Decodes a binary encoded ROM file. */
-  static decode(data: Uint8Array) {
+  static decode(data: Uint8Array, id?: number) {
     const partial = Rom.inflate(data)
     const rom = new Rom()
+    if (id != null) {
+      rom.localID = id
+      partial.localID = id
+    }
     rom.copy(partial)
     for (const [key, content] of Object.entries(partial.scripts)) {
       rom.scripts[key] = Buffer.from(pako.inflate(content)).toString()
@@ -88,12 +109,9 @@ export class Rom {
   /** Partial decode only of the header data. */
   static decodeHeaders(data: Uint8Array): RomInfo {
     const partial = Rom.inflate(data) as Partial<PartialRom>
-    const { scripts, assets } = partial
     delete partial.scripts
     delete partial.assets
     const header = partial as RomInfo
-    header.assetNames = Object.keys(assets ?? {})
-    header.scriptNames = Object.keys(scripts ?? {})
     return header
   }
 
@@ -114,8 +132,11 @@ export class Rom {
   /** @deprecated */
   baseURL = 'http://sigmasoldi3r.github.io/pagoda'
 
+  /** Scripts contained in this ROM, in pagoda script. */
   scripts: Record<string, string> = {}
+  /** Any text or binary assets. */
   assets: Record<string, Uint8Array> = {}
+  /** Local persistence identifier, present if serialized. */
   localID?: number
   profiles: ProfileDescriptor = {
     type: 'profiles',
@@ -133,6 +154,8 @@ export class Rom {
     this.meta.version = partial.meta.version
     this.meta.name = partial.meta.name
     this.meta.entry = partial.meta.entry
+    this.localID = partial.localID
+    this.profiles = partial.profiles
   }
 
   /** Try parse the script. */
@@ -162,6 +185,7 @@ export class Rom {
     return pako.deflate(JSON.stringify(data))
   }
 
+  /** Creates an octet stream type link and opens it. */
   downloadAsFile() {
     const a = document.createElement('a')
     a.href = `data:application/octet-stream;base64,${this.serializeBase64()}`
@@ -179,6 +203,33 @@ export class Rom {
 
   /** Converts the rom object into a ready to copy-and-paste URL */
   serializeURL() {
-    return this.baseURL + '?rom=' + encodeURIComponent(this.serializeBase64())
+    return (
+      /*this.baseURL + */ '?rom=' + encodeURIComponent(this.serializeBase64())
+    )
+  }
+
+  /** If a local ID is present, it attempts to update the entry. Inserts otherwise. */
+  async persist() {
+    console.log(this.localID)
+    if (this.localID != null) {
+      const found = await roms.get(this.localID)
+      if (found != null && found.id === this.localID) {
+        const { id } = await roms.put({
+          id: this.localID,
+          name: this.meta.name,
+          meta: this.meta,
+          data: this.encode(),
+        })
+        this.localID = id
+        return id
+      }
+    }
+    const { id } = await roms.add({
+      name: this.meta.name,
+      meta: this.meta,
+      data: this.encode(),
+    })
+    this.localID = id
+    return id
   }
 }

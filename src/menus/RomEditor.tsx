@@ -14,6 +14,8 @@ import Exp from '../components/Exp'
 import Metric from '../components/Metric'
 import { prompt } from '../components/Dialog'
 import { useSwipeable } from 'react-swipeable'
+import lock from '../components/Dialog/LockDialog'
+import alert from '../components/Dialog/Alert'
 
 export interface RomEditorProps {
   rom?: Rom
@@ -56,12 +58,14 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     'init',
   ])
   const [content, setContent] = useState('')
+  const [drawer, updateDrawer] = useState<'open' | 'closed'>('closed')
   const swiper = useSwipeable({
-    onSwiped: eventData => console.log('User Swiped!', eventData),
+    onSwipedLeft: () => updateDrawer('closed'),
+    onSwipedRight: () => updateDrawer('open'),
   })
 
   // METHODS //
-  function saveContents(
+  async function saveContents(
     rom: Rom,
     editor: Editor,
     [type, name]: typeof editing
@@ -98,7 +102,16 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
       return ['scripts', 'unknown']
     })
   }
-
+  async function persistRom() {
+    for (const r of rom) {
+      saveContents(r, editor.get(), editing)
+      const [close] = lock('Saving ROM...')
+      const id = await r.persist()
+      console.info(`Your ROM was saved as ${id}`)
+      close()
+      alert(`ROM saved!`)
+    }
+  }
   function getInitialContent(): [string, string] {
     for (const r of rom) {
       const entry = r.scripts[r.meta.entry ?? 'init']
@@ -180,7 +193,7 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
   return (
     <div style={{ height: '100%' }} {...swiper}>
       <div className="editor">
-        <div className="editor-items">
+        <div className={`editor-items editor-items-${drawer}`}>
           {editor.zip(rom).fold(<></>, ([, rom]) => {
             const scripts = Object.entries(rom.scripts)
             const assets = Object.entries(rom.assets)
@@ -208,8 +221,8 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
                     setInputs(i => ({ ...i, entry: e.target.value }))
                   }
                 />
-                <Button>
-                  <Icon src={diskette} /> Save Changes
+                <Button onClick={persistRom}>
+                  <Icon src={diskette} /> Save ROM
                 </Button>
                 <hr />
                 <div>

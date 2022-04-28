@@ -137,7 +137,6 @@ export class Rom {
 
   /** Try parse the script. */
   getScript(name: string) {
-    console.info(name, this.meta.entry, this.scripts)
     return trying(() => {
       const file = this.scripts[name ?? 'init']
       if (file == null) {

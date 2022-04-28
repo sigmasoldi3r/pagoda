@@ -242,6 +242,7 @@ export class Runtime {
     return result
   }
 
+  /** Resolve a property access expression. */
   async solveDot(expr: Expression): Promise<Value> {
     if (expr.type === 'dot') {
       let value = await this.solve(expr.head)

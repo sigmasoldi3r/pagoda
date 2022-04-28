@@ -13,6 +13,7 @@ import Input from '../components/Input'
 import Exp from '../components/Exp'
 import Metric from '../components/Metric'
 import { prompt } from '../components/Dialog'
+import { useSwipeable } from 'react-swipeable'
 
 export interface RomEditorProps {
   rom?: Rom
@@ -55,6 +56,9 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     'init',
   ])
   const [content, setContent] = useState('')
+  const swiper = useSwipeable({
+    onSwiped: eventData => console.log('User Swiped!', eventData),
+  })
 
   // METHODS //
   function saveContents(
@@ -174,7 +178,7 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     }
   }, [rom])
   return (
-    <div style={{ height: '100%' }}>
+    <div style={{ height: '100%' }} {...swiper}>
       <div className="editor">
         <div className="editor-items">
           {editor.zip(rom).fold(<></>, ([, rom]) => {

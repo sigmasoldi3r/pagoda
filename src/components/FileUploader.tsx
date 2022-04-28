@@ -21,9 +21,24 @@ export default function uploadFile(options?: Partial<FileUploadSettings>) {
   return new Promise<
     option<typeof options extends { directory: true } ? FileList : FileList>
   >(r => {
+    let hasFile = false
+    window.addEventListener(
+      'focus',
+      () => {
+        setTimeout(() => {
+          if (!hasFile) {
+            dom.onchange = null
+            done()
+            r(none())
+          }
+        })
+      },
+      { once: true }
+    )
     dom.onchange = e => {
       document.body.removeChild(dom)
       const t = e.target as any
+      hasFile = true
       done()
       if (t?.files) {
         r(some(t.files))

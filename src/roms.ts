@@ -121,6 +121,11 @@ section riverActions {
     "Stay" {
       "Some time passes..."
       wait
+      if Health < 10 and Hunger < 10 {
+        "You feel a little bit rested"
+        add 1 to Health
+        wait
+      }
       call walk
     }
   }

@@ -196,8 +196,8 @@ tuple "Tuple literal" = '[' elements:exprList ']' {
 }
 
 random "Random expression"
-  = 'roll' sides:(@(_ @number))? { return MakeCall({ type: 'name', value: '__rand' }, sides) }
-  / 'one' _ 'of' _ choices:exprList { return MakeCall({ type: 'name', value: '__rand' }, choices) }
+  = 'roll' sides:(@(_ @number))? { return MakeCall({ type: 'name', value: '__rand' }, [sides]) }
+  / 'one' _ 'of' _ choices:exprList { return MakeCall({ type: 'name', value: '__rand' }, [choices]) }
 
 block "Program block" = '{' p:program '}' {
   return {

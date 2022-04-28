@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "https://sigmasoldi3r.github.io/pagoda/static/css/main.22270bd3.css",
-    "main.js": "https://sigmasoldi3r.github.io/pagoda/static/js/main.5fc3909f.js",
+    "main.css": "https://sigmasoldi3r.github.io/pagoda/static/css/main.00bfe933.css",
+    "main.js": "https://sigmasoldi3r.github.io/pagoda/static/js/main.cf5a4a61.js",
     "static/js/312.5b3fff4e.chunk.js": "https://sigmasoldi3r.github.io/pagoda/static/js/312.5b3fff4e.chunk.js",
     "static/js/4877.d5a2d36c.chunk.js": "https://sigmasoldi3r.github.io/pagoda/static/js/4877.d5a2d36c.chunk.js",
     "static/js/1074.8d7d1640.chunk.js": "https://sigmasoldi3r.github.io/pagoda/static/js/1074.8d7d1640.chunk.js",
@@ -90,8 +90,8 @@
     "static/media/prstart.ttf": "https://sigmasoldi3r.github.io/pagoda/static/media/prstart.f22a5be077b22a25731a.ttf",
     "static/media/dpcomic.ttf": "https://sigmasoldi3r.github.io/pagoda/static/media/dpcomic.d7850454ee2ba505e533.ttf",
     "index.html": "https://sigmasoldi3r.github.io/pagoda/index.html",
-    "main.22270bd3.css.map": "https://sigmasoldi3r.github.io/pagoda/static/css/main.22270bd3.css.map",
-    "main.5fc3909f.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/main.5fc3909f.js.map",
+    "main.00bfe933.css.map": "https://sigmasoldi3r.github.io/pagoda/static/css/main.00bfe933.css.map",
+    "main.cf5a4a61.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/main.cf5a4a61.js.map",
     "312.5b3fff4e.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/312.5b3fff4e.chunk.js.map",
     "4877.d5a2d36c.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/4877.d5a2d36c.chunk.js.map",
     "1074.8d7d1640.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/1074.8d7d1640.chunk.js.map",
@@ -176,7 +176,7 @@
     "9377.1d9908d3.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/9377.1d9908d3.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.22270bd3.css",
-    "static/js/main.5fc3909f.js"
+    "static/css/main.00bfe933.css",
+    "static/js/main.cf5a4a61.js"
   ]
 }

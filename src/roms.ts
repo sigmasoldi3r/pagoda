@@ -97,9 +97,24 @@ section riverActions {
       } else if Hunger <= 0 {
         "You're not hungry right now..."
       } else if Food > 0 and Hunger > 0 {
-        add -1 to Hunger
-        add -1 to Food
-        "You ate some food..."
+        choice "How much?" {
+          "Just one" {
+            add -1 to Hunger
+            add -1 to Food
+            "You've eaten some food..."
+          }
+          "As much as I can" {
+            if Food > Hunger {
+              "You've eaten until you've felt satisfied"
+              set Hunger to 0
+              set Food to Food - Hunger
+            } else {
+              "You've eaten until there was nothing left"
+              set Food to 0
+              set Hunger to Hunger - Food
+            }
+          }
+        }
       }
       wait
     }

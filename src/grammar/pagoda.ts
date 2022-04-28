@@ -334,6 +334,13 @@ export class Runtime {
     if (test) {
       return await this.start(stmt.block)
     }
+    if (stmt.else != null) {
+      if (stmt.else.type === 'block') {
+        return await this.start(stmt.else)
+      } else {
+        return await this.branching(stmt.else)
+      }
+    }
   }
 
   // A character declaration, which assigns and creates the character.
@@ -429,6 +436,7 @@ export interface CharacterDeclaration extends Node<'character'> {
 export interface If extends Node<'if'> {
   expr: Expression
   block: Block
+  else?: If | Block
 }
 
 export interface Section extends Node<'section'> {

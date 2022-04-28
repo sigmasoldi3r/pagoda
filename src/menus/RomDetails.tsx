@@ -65,11 +65,35 @@ export default function RomDetails({ header: info }: { header: db.RomEntry }) {
         <hr />
         <p>Author: {info.meta.author}</p>
         <p>Version: {info.meta.version}</p>
+        {info.meta.collaborators != null ? (
+          <p>collaborators: {info.meta.collaborators}</p>
+        ) : null}
+        {info.meta.contact != null ? (
+          <p>
+            Contact:{' '}
+            <a rel="self" target="_blank" href={`mailto:${info.meta.contact}`}>
+              {info.meta.contact}
+            </a>
+          </p>
+        ) : null}
+        {info.meta.site != null ? (
+          <p>
+            Site:{' '}
+            <a rel="self" target="_blank" href={info.meta.site}>
+              {new URL(info.meta.site).host}
+            </a>
+          </p>
+        ) : null}
+        {info.meta.support != null ? (
+          <p>
+            Support:{' '}
+            <a rel="self" target="_blank" href={info.meta.support}>
+              {info.meta.support}
+            </a>
+          </p>
+        ) : null}
         <div style={{ color: 'red' }}>{error}</div>
         <p>{info.meta.desc}</p>
-        {info.meta.contact != null ? (
-          <a href={`mailto:${info.meta.contact}`}>{info.meta.contact}</a>
-        ) : null}
         <hr />
         <div
           style={{

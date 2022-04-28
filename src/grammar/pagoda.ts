@@ -136,6 +136,15 @@ export class Runtime {
     return null
   }
 
+  /** Solves the tuple-expression. */
+  async solveTuple(tuple: Tuple): Promise<Value> {
+    const result = [] as any[]
+    for (const expr of tuple.elements) {
+      result.push(await this.solve(expr))
+    }
+    return result
+  }
+
   /**
    * Resolve asynchronously any expression.
    */
@@ -153,6 +162,8 @@ export class Runtime {
         return await this.getText(expr)
       case 'number':
         return expr.value
+      case 'tuple':
+        return await this.solveTuple(expr)
     }
     return nothing
   }
@@ -345,7 +356,7 @@ export type Expression =
     } & Node<'unary'>)
   | Atom
 
-export type Atom = Call | Choice | Str | Num | Name | Unit
+export type Atom = Call | Choice | Str | Num | Name | Unit | Tuple
 
 export interface Block extends Node<'block'> {
   statements: Statement[]
@@ -363,6 +374,10 @@ export interface Num extends Node<'number'> {
 
 export interface Name extends Node<'name'> {
   value: IDENTIFIER
+}
+
+export interface Tuple extends Node<'tuple'> {
+  elements: Expression[]
 }
 
 export type Unit = Node<'unit'>

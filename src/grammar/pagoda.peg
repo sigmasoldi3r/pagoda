@@ -7,7 +7,9 @@
     'valid': true,
     'ok': true
   }
-  const makeBinary = (left, operator, right) => ({ type: 'binary', left, operator, right })
+  const MakeNumber = value => ({ type: 'number', value: Number(value)  })
+  const MakeBinary = (left, operator, right) => ({ type: 'binary', left, operator, right })
+  const MakeCall = (target, params = []) => ({ type: 'call', target, params })
 }
 
 program = statements:(_? @(statement /*/ pragma*/) _)* _? {
@@ -39,11 +41,12 @@ character = 'character' _? name:string _? 'as' _? target:IDENTIFIER {
   }
 }
 
-ifCase = 'if' _? expr:expression _? block:block {
+ifCase = 'if' _? expr:expression _? block:block or:(_? 'else' @((_ @ifCase) / (_? @block)))? {
   return {
     type: 'if',
     expr,
-    block
+    block,
+    else: or
   }
 }
 
@@ -55,12 +58,8 @@ section = 'section' _? target:IDENTIFIER _? block:block {
   }
 }
 
-call = 'call' _? target:name params:(_? 'with' @(' '+ @expression)+)? {
-  return {
-    type: 'call',
-    target,
-    params: params ?? []
-  }
+call = 'call' _? target:name params:(_? 'with' @exprList)? {
+  return MakeCall(target, params)
 }
 
 assignment
@@ -74,7 +73,7 @@ assignment
     return {
       type: 'assignment',
       target,
-      value: makeBinary({ type: 'name', value: target }, '+', value)
+      value: MakeBinary({ type: 'name', value: target }, '+', value)
     }
   }
 
@@ -128,38 +127,28 @@ choiceCase = match:(string / name) _? then:block {
 
 expression = logicExpr
 
-atom
-  = call
-  / choice
-  / string
-  / number
-  / nothing
-  / boolean
-  / name
-  / '(' _? @expression _? ')'
-
 logicExpr = left:compareExpr _ operator:('and'/'or') _ right:logicExpr {
-  return makeBinary(left, operator, right)
+  return MakeBinary(left, operator, right)
 } / compareExpr
 
 compareExpr = left:addExpr _? operator:COMPARE_OP _? right:compareExpr {
-  return makeBinary(left, operator, right)
+  return MakeBinary(left, operator, right)
 } / addExpr
 
 addExpr = left:mulExpr _? operator:[+-] _? right:addExpr {
-  return makeBinary(left, operator, right)
+  return MakeBinary(left, operator, right)
 } / mulExpr
 
 mulExpr = left:expExpr _? operator:[*/] _? right:mulExpr {
-  return makeBinary(left, operator, right)
+  return MakeBinary(left, operator, right)
 } / expExpr
 
 expExpr = left:unaryExpr _? operator:('^' / '**') _? right:expExpr {
-  return makeBinary(left, operator, right)
+  return MakeBinary(left, operator, right)
 } / unaryExpr
 
 unaryExpr
-  = operator:([!~@'¿+-] / (@'not' ' ')) _? term:atom {
+  = operator:(([!~@'¿+-] _?) / (@'not' _)) term:atom {
     return {
       type: 'unary',
       mode: 'prefix',
@@ -178,10 +167,37 @@ unaryExpr
   / propertyAccess
 
 propertyAccess "Property access" = left:atom _? "'s" _ right:propertyAccess {
-  return makeBinary(left, operator, right)
+  return MakeBinary(left, operator, right)
 } / atom
 
+atom
+  = call
+  / choice
+  / string
+  / number
+  / nothing
+  / boolean
+  / name
+  / exprWrap
+  / tuple
+
+// --------- PARTIALS --------- //
+exprWrap = '(' _? @expression _? ')'
+
+exprList = @(_ @expression)+
+
 // --------- ATOMS --------- //
+
+tuple "Tuple literal" = '[' elements:exprList ']' {
+  return {
+    type: 'tuple',
+    elements
+  }
+}
+
+random "Random expression"
+  = 'roll' sides:(@(_ @number))? { return MakeCall({ type: 'name', value: '__rand' }, sides) }
+  / 'one' _ 'of' _ choices:exprList { return MakeCall({ type: 'name', value: '__rand' }, choices) }
 
 block "Program block" = '{' p:program '}' {
   return {
@@ -202,23 +218,28 @@ string = '"' text:(stringRef / stringEmbedExpr / stringText)* '"' {
     type: 'string',
     text
   }
+} / "'" text:$(!_ .)+ {
+  return {
+    type: 'string',
+    text: [text]
+  }
 }
 
 stringRef = '$' @name
 
 stringEmbedExpr = '$(' _? @expression _? ')'
 
-stringText = e:$(!'"' ([^$] / '$$'))+ {
+stringText = e:$(!'"' ([^$] / '\\$'))+ {
   return e
 }
 
-number = n:$([0-9]+('.'[0-9]+)?) {
-  const value = Number(n)
-  return {
-    type: 'number',
-    value
-  }
-}
+number
+  = n:$([0-9]+('.'[0-9]+)?) { return MakeNumber(n) }
+  / '1st' { return MakeNumber('1') }
+  / '2nd' { return MakeNumber('2') }
+  / '3rd' { return MakeNumber('3') }
+  / n:$([0-9]+) 'th' { return MakeNumber(n) }
+  / expr:exprWrap 'th' { return MakeBinary(expr, '-', MakeNumber('1')) }
 
 boolean = b:BOOLEAN {
   const value = b in trueBooleanSet

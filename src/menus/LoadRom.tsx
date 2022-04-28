@@ -67,7 +67,7 @@ export default function LoadRom() {
         onClick={e => {
           e.stopPropagation()
           e.preventDefault()
-          console.log('Dumping...')
+          console.log('Loading sample...')
           nav.push(<Stage rom={roms.Survivors} />)
         }}
       >

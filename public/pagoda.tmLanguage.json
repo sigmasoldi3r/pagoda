@@ -1,0 +1,95 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "Pagoda",
+  "patterns": [
+    {
+      "include": "#keywords"
+    },
+    {
+      "include": "#numbers"
+    },
+    {
+      "include": "#string"
+    },
+    {
+      "include": "#comments"
+    }
+  ],
+  "repository": {
+    "keywords": {
+      "patterns": [
+        {
+          "name": "keyword.pagoda",
+          "match": "\\b(and|or|as|to|with)\\b"
+        },
+        {
+          "name": "keyword.other.pagoda",
+          "match": "\\b(section|character|true|false|clear|set|add|increment)\\b"
+        },
+        {
+          "name": "keyword.control.pagoda",
+          "match": "\\b(call|if|wait|end|show|return|with|choice)\\b"
+        }
+      ]
+    },
+    "string": {
+      "name": "string.quoted.double.",
+      "begin": "\"",
+      "end": "\"",
+      "patterns": [
+        {
+          "name": "constant.character.escape.pagoda",
+          "match": "\\\\(?:[abfnrtv\\\\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+        },
+        {
+          "match": "\\$[A-Za-z_][A-Za-z0-9_]*",
+          "name": "variable.interpolated.pagoda"
+        },
+        {
+          "begin": "\\$\\(",
+          "end": "\\)",
+          "name": "variable.interpolated.pagoda",
+          "patterns": [{ "include": "#expression" }]
+        }
+      ]
+    },
+    "numbers": {
+      "patterns": [
+        {
+          "match": "\\d*\\.\\d+([eE][\\-+]?\\d+)?",
+          "name": "constant.numeric.float.pagoda"
+        },
+        {
+          "match": "0[xX][0-9a-fA-F]+",
+          "name": "constant.numeric.hex.pagoda"
+        },
+        {
+          "match": "\\d+",
+          "name": "constant.numeric.pagoda"
+        }
+      ]
+    },
+    "expression": {
+      "patterns": [
+        {
+          "include": "#string"
+        },
+        {
+          "include": "#whitespace"
+        },
+        {
+          "include": "#numbers"
+        }
+      ]
+    },
+    "comments": {
+      "patterns": [
+        {
+          "match": "#.*$",
+          "name": "comment.pagoda"
+        }
+      ]
+    }
+  },
+  "scopeName": "pagoda"
+}

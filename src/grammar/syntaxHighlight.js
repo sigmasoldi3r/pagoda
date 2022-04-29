@@ -18,8 +18,11 @@ module.exports = {
     'add',
     'increment',
     'choice',
+    'else',
+    'and',
+    'or',
+    'is',
   ],
-
   operators: [
     '=',
     '>',
@@ -31,9 +34,6 @@ module.exports = {
     '<=',
     '>=',
     '<>',
-    'and',
-    'is',
-    'or',
     '+',
     '-',
     '*',
@@ -41,7 +41,7 @@ module.exports = {
   ],
 
   // we include these common regular expressions
-  symbols: /[=><!~?:&|+\-*\/\^%]+/,
+  symbols: /[=><!~?&|+\-*\/\^%]+/,
 
   // String escapes
   escapes:
@@ -49,6 +49,10 @@ module.exports = {
 
   tokenizer: {
     root: [
+      { include: '@sectionDec' },
+      [/one[ \t\n\r]+of/, 'regexp'],
+      [/[0-9]+(st|nd|rd|th)/, 'number'],
+      [/'s/, 'tag'],
       [
         /[a-z_$][\w$]*/,
         {
@@ -65,19 +69,23 @@ module.exports = {
 
       { include: '@operators' },
       { include: '@numbers' },
-
       { include: '@stringOpen' },
     ],
 
+    sectionDec: [[/(section|call)/, { token: 'keyword', next: '@sectName' }]],
+
+    sectName: [[/[ \t\n\r]+[A-Za-z0-9_]+/, { token: 'regexp', next: '@pop' }]],
+
     stringOpen: [
       // strings
+      [/:[^ \t\]\)]+/, { token: 'string.quote' }],
       [/"/, { token: 'string.quote', bracket: '@open', next: '@string' }],
     ],
 
     operators: [
       // delimiters and operators
-      [/[{}()\[\]]/, '@brackets'],
-      [/[<>](?!@symbols)/, '@brackets'],
+      // [/[{}()\[\]]/, '@brackets'],
+      // [/[<>](?!@symbols)/, '@brackets'],
       [/@symbols/, { cases: { '@operators': 'operator', '@default': '' } }],
       // delimiter: after number because of .\d floats
       [/[;,.]/, 'delimiter'],
@@ -94,7 +102,8 @@ module.exports = {
       { include: '@stringOpen' },
       { include: '@whitespace' },
       { include: '@numbers' },
-      // { include: '@operators' },
+      { include: '@sectionDec' },
+      { include: '@operators' },
       [/\)/, { token: 'variable', bracket: '@close', next: '@pop' }],
     ],
 

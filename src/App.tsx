@@ -1,7 +1,7 @@
 import MainMenu from './menus/MainMenu'
 import { VirtualFileProvider } from './components/VirtualFile'
 import DialogProvider from './components/Dialog'
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
+import { HashRouter, Navigate, Route, Routes } from 'react-router-dom'
 import RomList from './menus/RomList'
 import RomDetailRoute from './menus/RomDetailRoute'
 import RomCreationChoice from './menus/RomCreationChoice'
@@ -10,7 +10,7 @@ import StageRoute from './menus/StageRoute'
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <DialogProvider />
       <VirtualFileProvider />
       <Routes>
@@ -24,7 +24,7 @@ function App() {
           <Route path="*" element={<Navigate to="/" />} />
         </Route>
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   )
 }
 

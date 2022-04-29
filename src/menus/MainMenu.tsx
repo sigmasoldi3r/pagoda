@@ -16,6 +16,8 @@ import { prompt } from '../components/Dialog'
 import alert from '../components/Dialog/Alert'
 import { useNavigate } from 'react-router-dom'
 import lock from '../components/Dialog/LockDialog'
+import { Rom } from '../lib/storage/Rom'
+import { t } from '../lib/translate'
 
 // Main menu component.
 export default function MainMenu() {
@@ -33,8 +35,13 @@ export default function MainMenu() {
     navigate(`/rom/list`)
   }
   async function importRom() {
-    for (const files of await uploadFile()) {
-      console.log(files[0])
+    for (const [file] of await uploadFile()) {
+      await lock.safe('Processing files...', async () => {
+        const data = await file.arrayBuffer()
+        const rom = Rom.decode(new Uint8Array(data))
+        const id = await rom.persist()
+        await alert(t`Done! Imported ROM file ${file.name} as ${rom.meta.name}`)
+      })
     }
     // navigate(`/rom/import`)
   }

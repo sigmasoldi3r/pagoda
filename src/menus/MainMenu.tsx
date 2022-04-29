@@ -5,7 +5,6 @@ import cog from '../icons/cog_wheel.png'
 import newPackage from '../icons/new_package.png'
 import pagodaLogo from '../logo.png'
 import Icon from '../components/Icon'
-import { useNav } from '../components/Nav'
 import RomList from './RomList'
 import * as builtins from '../roms'
 import * as db from '../lib/storage/database'
@@ -15,10 +14,11 @@ import RomCreationChoice from './RomCreationChoice'
 import uploadFile from '../components/FileUploader'
 import { prompt } from '../components/Dialog'
 import alert from '../components/Dialog/Alert'
+import { useNavigate } from 'react-router-dom'
+import lock from '../components/Dialog/LockDialog'
 
 // Main menu component.
 export default function MainMenu() {
-  const [locked, setLocked] = useState(false)
   const [alreadyExists, setAlreadyExists] = useState(true)
   useEffect(() => {
     db.roms.getAll().then(all => {
@@ -28,17 +28,18 @@ export default function MainMenu() {
       }
     })
   }, [])
-  const nav = useNav()
+  const navigate = useNavigate()
   function openRom() {
-    nav.push(<RomList />)
+    navigate(`/rom/list`)
   }
   async function importRom() {
     for (const files of await uploadFile()) {
       console.log(files[0])
     }
+    // navigate(`/rom/import`)
   }
   async function createRom() {
-    nav.push(<RomCreationChoice />)
+    navigate(`/rom/new`)
   }
   async function goToOptions() {
     if (await prompt('Clear all ROMs?', 'boolean')) {
@@ -46,16 +47,21 @@ export default function MainMenu() {
       for (const rom of list) {
         await db.roms.delete(rom.id)
       }
-      alert(`Deleted ${list.length} ROMs!`)
+      await alert(`Deleted ${list.length} ROMs!`)
+      setAlreadyExists(false)
     }
+    // navigate(`/settings`)
   }
   async function importSampleRom() {
-    setLocked(true)
-    await builtins.Survivors.persist()
-    console.log('Done!')
-    setAlreadyExists(true)
-    db.roms.consoleTable()
-    setLocked(false)
+    const [close] = lock(`Importing ROMs...`)
+    try {
+      await builtins.Survivors.persist()
+      console.log('Done!')
+      setAlreadyExists(true)
+      db.roms.consoleTable()
+    } finally {
+      close()
+    }
   }
   return (
     <MenuLike>
@@ -66,19 +72,19 @@ export default function MainMenu() {
         />
         <h1>Pagoda Engine</h1>
       </div>
-      <Button disabled={locked} onClick={openRom}>
+      <Button onClick={openRom}>
         <Icon src={folder} /> &nbsp;Open a ROM
       </Button>
-      <Button disabled={locked} onClick={importRom}>
+      <Button onClick={importRom}>
         <Icon src={diskette} /> &nbsp;Import a ROM file
       </Button>
-      <Button disabled={alreadyExists || locked} onClick={importSampleRom}>
+      <Button disabled={alreadyExists} onClick={importSampleRom}>
         <Icon src={diskette} /> &nbsp;Import examples
       </Button>
-      <Button disabled={locked} onClick={createRom}>
+      <Button link="/rom/new">
         <Icon src={newPackage} /> &nbsp;Create a new ROM
       </Button>
-      <Button disabled={locked} onClick={goToOptions}>
+      <Button onClick={goToOptions}>
         <Icon src={cog} /> &nbsp;Options
       </Button>
     </MenuLike>

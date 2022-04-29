@@ -8,7 +8,12 @@
   margin: 0.2rem;
   line-height: 1.2rem;
   border-radius: 0;
+  background-color: white;
+  border: 2px outset gray;
+  text-decoration: none;
+  color: black;
   text-align: left;
+  cursor: pointer;
 }
 .btn-disabled {
   border-style: inset;

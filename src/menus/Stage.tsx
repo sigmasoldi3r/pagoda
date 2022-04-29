@@ -1,10 +1,10 @@
 import EventEmitter from 'events'
 import { useEffect, useState } from 'react'
-import { useNav } from '../components/Nav'
 import * as lib from '../grammar/pagoda'
 import { Rom } from '../lib/storage/Rom'
 import Markdown from 'react-markdown'
 import gfm from 'remark-gfm'
+import { useNavigate } from 'react-router-dom'
 
 interface ChoiceProps {
   done: () => void
@@ -60,7 +60,7 @@ function clearInstances() {
   window.removeEventListener('popstate', clearInstances)
 }
 export default function Stage({ rom }: { rom: Rom }) {
-  const nav = useNav()
+  const navigate = useNavigate()
   const [narration, narrate] = useState<JSX.Element[]>([])
   const [choice, setChoice] = useState<JSX.Element | null>(null)
   const [ended, setEnded] = useState(false)
@@ -164,7 +164,7 @@ export default function Stage({ rom }: { rom: Rom }) {
   }, [])
   function handleTap() {
     if (ended && instances > 0) {
-      nav.pop()
+      navigate(`/rom/${rom.localID}`)
     } else if (waiting) {
       events.emit('tap')
     }

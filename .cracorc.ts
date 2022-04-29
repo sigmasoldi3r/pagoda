@@ -4,6 +4,7 @@ import path from 'path'
 import webpack from 'webpack'
 import fs from 'fs'
 import toml from 'toml'
+import RomPackerPlugin from './.craco/RomPackerPlugin'
 
 const rd = (_: string) => fs.readdirSync(_).map(__ => path.join(_, __))
 
@@ -78,6 +79,9 @@ export default {
         new webpack.ProvidePlugin({
           Buffer: ['buffer', 'Buffer'],
         }),
+        new RomPackerPlugin({
+          sources: ['examples'],
+        }),
       ],
       resolve: {
         fallback: {
@@ -89,10 +93,15 @@ export default {
           {
             test: /\.peg$/i,
             type: 'javascript/auto',
-            loader: path.resolve(__dirname, '.peggyloader.js'),
+            loader: path.resolve(__dirname, '.craco/peg.js'),
           },
           {
-            test: /\.txt$/i,
+            test: /\.toml$/i,
+            type: 'javascript/auto',
+            loader: path.resolve(__dirname, '.craco/toml.js'),
+          },
+          {
+            test: /\.(txt|pag)$/i,
             type: 'asset/source',
           },
         ],

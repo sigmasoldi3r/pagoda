@@ -4,20 +4,17 @@ import MenuLike from '../components/MenuLike'
 import uploadFolderIcon from '../icons/upload_folder.png'
 import createPackageIcon from '../icons/new_package.png'
 import packageIcon from '../icons/package.png'
-import { useNav } from '../components/Nav'
-import RomEditor from './RomEditor'
 import uploadFile from '../components/FileUploader'
 import lock from '../components/Dialog/LockDialog'
 import alert from '../components/Dialog/Alert'
 import { sleep } from '../lib/Coroutines'
 import toml from 'toml'
 import { Rom } from '../lib/storage/Rom'
+import { useNavigate } from 'react-router-dom'
 
+/** New ROM menu section. */
 export default function RomCreationChoice() {
-  const nav = useNav()
-  function createRom() {
-    nav.push(<RomEditor />)
-  }
+  const navigate = useNavigate()
   async function uploadRomFolder() {
     for (const folder of await uploadFile({ directory: true })) {
       const [done, update] = lock('Processing files...')
@@ -33,9 +30,10 @@ export default function RomCreationChoice() {
             await file.text()
         }
       }
+      const id = await rom.persist()
       done()
       await alert('Import complete!')
-      nav.push(<RomEditor rom={rom} />)
+      navigate(`/rom/edit/${id}`)
     }
   }
   return (
@@ -46,7 +44,7 @@ export default function RomCreationChoice() {
         <Icon src={packageIcon} />
         <div style={{ marginTop: '0.5rem' }}>&nbsp;</div>
       </div>
-      <Button onClick={createRom}>
+      <Button link="/rom/new">
         <Icon src={createPackageIcon} /> &nbsp;From scratch
       </Button>
       <Button onClick={uploadRomFolder}>

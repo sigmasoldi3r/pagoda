@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import { Link } from 'react-router-dom'
 
 export type InheritedProps = React.HTMLAttributes<HTMLButtonElement>
 
@@ -6,6 +7,7 @@ export interface ButtonProps {
   disabled?: boolean
   children?: InheritedProps['children']
   onClick?: InheritedProps['onClick']
+  link?: string
   className?: InheritedProps['className']
   id?: InheritedProps['id']
   variant?:
@@ -49,9 +51,25 @@ export default function Button({
   disabled,
   children,
   onClick,
+  link,
   size = 'normal',
   variant = 'normal',
 }: ButtonProps) {
+  if (link != null) {
+    return (
+      <Link
+        to={link}
+        className={[
+          className,
+          baseClassNames,
+          disabled ? 'btn-disabled' : '',
+          classVariants[variant],
+          classSizes[size],
+        ].join(' ')}
+        children={children}
+      />
+    )
+  }
   return (
     <button
       className={[

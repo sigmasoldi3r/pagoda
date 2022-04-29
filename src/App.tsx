@@ -7,6 +7,7 @@ import RomDetailRoute from './menus/RomDetailRoute'
 import RomCreationChoice from './menus/RomCreationChoice'
 import RomEditorRoute from './menus/RomEditorRoute'
 import StageRoute from './menus/StageRoute'
+import Manual from './menus/Manual'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
       <VirtualFileProvider />
       <Routes>
         <Route path="/" element={<MainMenu />} />
+        <Route path="/manual" element={<Manual />} />
         <Route path="/rom">
           <Route path="list" element={<RomList />} />
           <Route path="new" element={<RomCreationChoice />} />

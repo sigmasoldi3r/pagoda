@@ -95,6 +95,9 @@ export default function RomDetail({ info, id }: { id: number; info: RomInfo }) {
           </Button>
         </div>
       </div>
+      <Button onClick={() => navigate('/rom/list')} size="small">
+        Back
+      </Button>
     </div>
   )
 }

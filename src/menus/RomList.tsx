@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Button from '../components/Button'
 import { Rom, RomInfo } from '../lib/storage/Rom'
 import { t } from '../lib/translate'
 import useOptionState from '../lib/useOptionState'
@@ -65,6 +66,9 @@ export default function RomList() {
       {roms.fold(<div>Loading ROMs...</div>, roms => (
         <RomListPanel roms={roms} />
       ))}
+      <Button onClick={() => navigate('/')} size="small">
+        Back
+      </Button>
     </div>
   )
 }

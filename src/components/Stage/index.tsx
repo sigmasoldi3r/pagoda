@@ -94,6 +94,7 @@ export default function Stage({ rom }: { rom: Rom }) {
     } else {
       const text = rom.scripts[rom.meta.entry ?? 'init']
       const err = result.error as any
+      console.error(err, rom)
       narrate(s => [
         ...s,
         <div style={{ color: 'red' }}>

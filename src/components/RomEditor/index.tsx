@@ -17,6 +17,7 @@ import { useSwipeable } from 'react-swipeable'
 import lock from '../Dialog/LockDialog'
 import alert from '../Dialog/Alert'
 import template from './template.pag'
+import { getLang, textLike } from './mimeTypes'
 
 export interface RomEditorProps {
   rom: Rom
@@ -25,29 +26,6 @@ export interface RomEditorProps {
 
 type Editor = monaco.editor.IStandaloneCodeEditor
 type Editables = Extract<keyof Rom, 'assets' | 'scripts'>
-
-export const textLike =
-  /\.(md|txt|license|ignore|js|ts|html|css|xml|conf|ini|toml|php|json|pag)$/i
-
-export const langByExtension = {
-  md: 'markdown',
-  js: 'javascript',
-  ts: 'typescript',
-  php: 'php',
-  xml: 'xml',
-  html: 'html',
-  xhtml: 'html',
-  css: 'css',
-  conf: 'toml',
-  ini: 'toml',
-  toml: 'toml',
-  json: 'json',
-  pag: 'pagoda',
-}
-/** Get a language name for monaco by extension or return 'text'. */
-function getLang(ext: string) {
-  return langByExtension[ext] ?? 'text'
-}
 
 // Rom project editor.
 export default function RomEditor({ rom }: RomEditorProps) {
@@ -71,6 +49,7 @@ export default function RomEditor({ rom }: RomEditorProps) {
     editor: Editor,
     [type, name]: typeof editing
   ) {
+    console.log(`Saving ${type}/${name}...`)
     if (type === 'assets') {
       rom.assets[name] = new Uint8Array(
         [...editor.getValue()].map(c => c.charCodeAt(0))
@@ -84,7 +63,6 @@ export default function RomEditor({ rom }: RomEditorProps) {
     return setEditing(prev => {
       if (once++ > 0) return target
       const ed = editor
-      const rm = rom
       const [type, name] = target
       const ext = name.match(/\.([^\.]+)$/i)?.[1] ?? 'txt'
       const lang = getLang(ext)
@@ -104,8 +82,8 @@ export default function RomEditor({ rom }: RomEditorProps) {
     })
   }
   async function persistRom() {
-    saveContents(rom, editor.get(), editing)
     await lock.safe('Saving ROM...', async () => {
+      saveContents(rom, editor.get(), editing)
       const id = await rom.persist()
       console.info(`Your ROM was saved as ${id}`)
       await alert(`ROM saved!`)
@@ -160,6 +138,7 @@ export default function RomEditor({ rom }: RomEditorProps) {
       ed.onDidChangeModelContent(() => {
         setContent(() => ed.getValue())
       })
+      saveContents(rom, ed, editing)
     }
   }, [rom])
   return (
@@ -200,9 +179,9 @@ export default function RomEditor({ rom }: RomEditorProps) {
                 <div>
                   <h4>Scripts ({scripts.length})</h4>
                   <ul className="list">
-                    {scripts.map(([key, script], i) => (
+                    {scripts.map(([key, script]) => (
                       <li
-                        key={`_rom_script_${i}`}
+                        key={`_rom_script_${key}`}
                         className="entry"
                         onClick={() => updateEditing(['scripts', key])}
                       >
@@ -224,9 +203,9 @@ export default function RomEditor({ rom }: RomEditorProps) {
                 <div>
                   <h4>Assets ({assets.length})</h4>
                   <ul className="list">
-                    {assets.map(([key, asset], i) => (
+                    {assets.map(([key, asset]) => (
                       <li
-                        key={`_rom_asset_${i}`}
+                        key={`_rom_asset_${key}`}
                         className="entry"
                         onClick={() => {
                           if (key.match(textLike)) {

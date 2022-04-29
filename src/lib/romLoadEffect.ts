@@ -18,7 +18,8 @@ export async function load(
       await alert(`Could not load the ROM #${id}!`)
       navigate(-1)
     }
-    const rom = Rom.decode(info.data)
+    const rom = Rom.decode(info.data, id)
+    console.info('Decoded ROM', rom)
     update(rom)
   } catch (err) {
     console.error(err)

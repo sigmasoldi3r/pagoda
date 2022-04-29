@@ -5,6 +5,16 @@ declare module '*.txt' {
   export default value
 }
 
+declare module '*.pag' {
+  const value: string
+  export default value
+}
+
+declare module '*.toml' {
+  const value: Record<string, any>
+  export default value
+}
+
 declare module '*.peg' {
   export function parse<A>(
     input: string,

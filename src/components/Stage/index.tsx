@@ -1,64 +1,14 @@
 import EventEmitter from 'events'
 import { useEffect, useState } from 'react'
-import * as lib from '../grammar/pagoda'
-import { Rom } from '../lib/storage/Rom'
+import * as lib from '../../grammar/pagoda'
+import { Rom } from '../../lib/storage/Rom'
 import Markdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import { useNavigate } from 'react-router-dom'
-
-interface ChoiceProps {
-  done: () => void
-  options: [lib.ChoiceCase, string][]
-  rt: lib.Runtime
-  def: lib.Choice
-  title: string
-}
-
-function ChoiceMenu({ done, title, rt, options }: ChoiceProps) {
-  const [open, setOpen] = useState(true)
-  if (!open) {
-    return null
-  }
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexFlow: 'column',
-        border: '1px solid gray',
-        margin: '1rem',
-        padding: '1rem',
-      }}
-    >
-      <h3>{title}</h3>
-      {options.map(([opt, label], i) => {
-        return (
-          <button
-            key={`${title}_ch_${i}`}
-            onClick={async e => {
-              setOpen(false)
-              e.stopPropagation()
-              e.preventDefault()
-              await rt.start(opt.then)
-              done()
-            }}
-            className="choice"
-          >
-            {label}
-          </button>
-        )
-      })}
-    </div>
-  )
-}
+import ChoiceMenu from './ChoiceMenu'
 
 const events = new EventEmitter()
 
-let choices = 0
-let instances = 0
-function clearInstances() {
-  instances = 0
-  window.removeEventListener('popstate', clearInstances)
-}
 export default function Stage({ rom }: { rom: Rom }) {
   const navigate = useNavigate()
   const [narration, narrate] = useState<JSX.Element[]>([])
@@ -66,8 +16,6 @@ export default function Stage({ rom }: { rom: Rom }) {
   const [ended, setEnded] = useState(false)
   const [waiting, setWaiting] = useState(false)
   useEffect(() => {
-    if (instances++ > 0) return
-    window.addEventListener('popstate', clearInstances)
     const rt = new lib.Runtime(async function (stmt) {
       switch (stmt.type) {
         case 'clear':
@@ -124,7 +72,7 @@ export default function Stage({ rom }: { rom: Rom }) {
             }
             setChoice(
               <ChoiceMenu
-                key={`__choices_${choices++}`}
+                key={`__choices_${Date.now()}`}
                 title={title}
                 def={stmt}
                 rt={this}
@@ -163,7 +111,7 @@ export default function Stage({ rom }: { rom: Rom }) {
     }
   }, [])
   function handleTap() {
-    if (ended && instances > 0) {
+    if (ended) {
       navigate(`/rom/${rom.localID}`)
     } else if (waiting) {
       events.emit('tap')

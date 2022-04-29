@@ -1,0 +1,13 @@
+###
+# Welcome to Pagoda script editor!
+# This is your game entry point script, from here
+# you can navigate to other scripts and create
+# assets. Feel free to remove this comments.
+#
+# To get started read the docs about the Pagoda
+# scripting language:
+# https://github.com/sigmasoldi3r/pagoda
+###
+
+"Hello World!"
+wait

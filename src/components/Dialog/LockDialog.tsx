@@ -20,3 +20,16 @@ export default function lock(content: ReactNode) {
   }
   return [done, update, key] as const
 }
+
+/** Performs a lock inside a sentry so the unlock will occur eventually. */
+lock.safe = async function (
+  content: ReactNode,
+  func: (...fns: ReturnType<typeof lock>) => Promise<void>
+) {
+  const fns = lock(content)
+  try {
+    func(...fns)
+  } finally {
+    await fns[0]()
+  }
+}

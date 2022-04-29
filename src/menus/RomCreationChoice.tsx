@@ -36,6 +36,16 @@ export default function RomCreationChoice() {
       navigate(`/rom/edit/${id}`)
     }
   }
+  async function newAndEdit() {
+    const [close] = lock(`Preparing ROM files...`)
+    try {
+      const rom = new Rom()
+      const id = await rom.persist()
+      navigate(`/rom/edit/${id}`)
+    } finally {
+      close()
+    }
+  }
   return (
     <MenuLike>
       <div style={{ textAlign: 'center' }}>
@@ -44,7 +54,7 @@ export default function RomCreationChoice() {
         <Icon src={packageIcon} />
         <div style={{ marginTop: '0.5rem' }}>&nbsp;</div>
       </div>
-      <Button link="/rom/new">
+      <Button onClick={newAndEdit}>
         <Icon src={createPackageIcon} /> &nbsp;From scratch
       </Button>
       <Button onClick={uploadRomFolder}>

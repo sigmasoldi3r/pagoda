@@ -1,24 +1,26 @@
 import * as monaco from 'monaco-editor'
+import '../../grammar/editor'
 import { useEffect, useRef, useState } from 'react'
-import Button from '../components/Button'
-import '../grammar/editor'
-import { Rom } from '../lib/storage/Rom'
-import useOptionState from '../lib/useOptionState'
-import Icon from '../components/Icon'
-import addScriptIcon from '../icons/add_script.png'
-import diskette from '../icons/diskette.png'
-import addTextIcon from '../icons/add_text.png'
-import uploadFileIcon from '../icons/upload_file.png'
-import Input from '../components/Input'
-import Exp from '../components/Exp'
-import Metric from '../components/Metric'
-import { prompt } from '../components/Dialog'
+import Button from '../Button'
+import { Rom } from '../../lib/storage/Rom'
+import useOptionState from '../../lib/useOptionState'
+import Icon from '../Icon'
+import addScriptIcon from '../../icons/add_script.png'
+import diskette from '../../icons/diskette.png'
+import addTextIcon from '../../icons/add_text.png'
+import uploadFileIcon from '../../icons/upload_file.png'
+import Input from '../Input'
+import Exp from '../Exp'
+import Metric from '../Metric'
+import { prompt } from '../Dialog'
 import { useSwipeable } from 'react-swipeable'
-import lock from '../components/Dialog/LockDialog'
-import alert from '../components/Dialog/Alert'
+import lock from '../Dialog/LockDialog'
+import alert from '../Dialog/Alert'
+import template from './template.pag'
 
 export interface RomEditorProps {
-  rom?: Rom
+  rom: Rom
+  id: number
 }
 
 type Editor = monaco.editor.IStandaloneCodeEditor
@@ -48,9 +50,8 @@ function getLang(ext: string) {
 }
 
 // Rom project editor.
-export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
+export default function RomEditor({ rom }: RomEditorProps) {
   const ref = useRef<HTMLDivElement>()
-  const [rom, setRom, , updateRom] = useOptionState<Rom>()
   const [editor, setEditor] = useOptionState<Editor>()
   const [inputs, setInputs] = useState({ name: '', author: '', entry: '' })
   const [editing, setEditing] = useState<[Editables, string]>([
@@ -87,7 +88,7 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
       const [type, name] = target
       const ext = name.match(/\.([^\.]+)$/i)?.[1] ?? 'txt'
       const lang = getLang(ext)
-      for (const [editor, rom] of ed.zip(rm)) {
+      for (const editor of ed) {
         saveContents(rom, editor, prev)
         if (type === 'assets') {
           const buffer = Buffer.from(rom.assets[name])
@@ -103,47 +104,26 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
     })
   }
   async function persistRom() {
-    for (const r of rom) {
-      saveContents(r, editor.get(), editing)
-      const [close] = lock('Saving ROM...')
-      const id = await r.persist()
+    saveContents(rom, editor.get(), editing)
+    await lock.safe('Saving ROM...', async () => {
+      const id = await rom.persist()
       console.info(`Your ROM was saved as ${id}`)
-      close()
-      alert(`ROM saved!`)
-    }
+      await alert(`ROM saved!`)
+    })
   }
   function getInitialContent(): [string, string] {
-    for (const r of rom) {
-      const entry = r.scripts[r.meta.entry ?? 'init']
-      if (entry != null) {
-        setEditing(['scripts', r.meta.entry ?? 'init'])
-        return [entry, 'pagoda']
-      }
+    const entry = rom.scripts[rom.meta.entry ?? 'init']
+    if (entry != null) {
+      setEditing(['scripts', rom.meta.entry ?? 'init'])
+      return [entry, 'pagoda']
     }
-    return [
-      `###
-# Welcome to Pagoda script editor!
-# This is your game entry point script, from here
-# you can navigate to other scripts and create
-# assets. Feel free to remove this comments.
-#
-# To get started read the docs about the Pagoda
-# scripting language:
-# https://github.com/sigmasoldi3r/pagoda
-###`,
-      'pagoda',
-    ]
+    return [template, 'pagoda']
   }
   async function createScript() {
     for (const name of await prompt('Enter a file name')) {
-      updateRom(rom =>
-        rom.map(rom => {
-          if (rom.scripts[name] == null) {
-            rom.scripts[name] = ''
-          }
-          return rom
-        })
-      )
+      if (rom.scripts[name] == null) {
+        rom.scripts[name] = ''
+      }
     }
   }
   async function uploadFile() {}
@@ -151,50 +131,42 @@ export default function RomEditor({ rom: preloadedRom }: RomEditorProps) {
 
   // EFFECTS //
   useEffect(() => {
-    if (preloadedRom != null) {
-      setRom(preloadedRom)
-    } else {
-      setRom(new Rom())
-    }
-  }, [])
-  useEffect(() => {
-    for (const {
+    const {
       meta: { name, author, entry: _entry },
-    } of rom) {
-      const entry = _entry ?? 'init'
-      setInputs({ name, author, entry })
-      if (editor.isEmpty() && ref.current != null) {
-        while (ref.current.firstChild) {
-          if (ref.current.lastChild != null) {
-            ref.current.removeChild(ref.current.lastChild)
-          }
+    } = rom
+    const entry = _entry ?? 'init'
+    setInputs({ name, author, entry })
+    if (editor.isEmpty() && ref.current != null) {
+      while (ref.current.firstChild) {
+        if (ref.current.lastChild != null) {
+          ref.current.removeChild(ref.current.lastChild)
         }
-        const ed = monaco.editor.create(ref.current, {
-          theme: 'vs-dark',
-          model: monaco.editor.createModel(...getInitialContent()),
-          fontFamily: 'Press Start',
-          wordWrap: 'bounded',
-          wrappingStrategy: 'advanced',
-        })
-        ed.layout()
-        setContent(() => ed.getValue())
-        setEditor(last => {
-          for (const editor of last) {
-            editor.dispose()
-          }
-          return ed
-        })
-        ed.onDidChangeModelContent(() => {
-          setContent(() => ed.getValue())
-        })
       }
+      const ed = monaco.editor.create(ref.current, {
+        theme: 'vs-dark',
+        model: monaco.editor.createModel(...getInitialContent()),
+        fontFamily: 'Press Start',
+        wordWrap: 'bounded',
+        wrappingStrategy: 'advanced',
+      })
+      ed.layout()
+      setContent(() => ed.getValue())
+      setEditor(last => {
+        for (const editor of last) {
+          editor.dispose()
+        }
+        return ed
+      })
+      ed.onDidChangeModelContent(() => {
+        setContent(() => ed.getValue())
+      })
     }
   }, [rom])
   return (
     <div style={{ height: '100%' }} {...swiper}>
       <div className="editor">
         <div className={`editor-items editor-items-${drawer}`}>
-          {editor.zip(rom).fold(<></>, ([, rom]) => {
+          {editor.fold(<></>, () => {
             const scripts = Object.entries(rom.scripts)
             const assets = Object.entries(rom.assets)
             return (

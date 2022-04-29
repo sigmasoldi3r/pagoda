@@ -73,6 +73,7 @@ export class Rom {
     return result.map(r => {
       const header = Rom.decodeHeaders(r.data)
       header.localID = r.id
+      header.data = r.data
       return header
     })
   }
@@ -159,9 +160,10 @@ export class Rom {
   }
 
   /** Try parse the script. */
-  getScript(name: string) {
+  getScript(providedName?: string) {
+    const name = providedName ?? this.meta.entry ?? 'init'
     return trying(() => {
-      const file = this.scripts[name ?? 'init']
+      const file = this.scripts[name]
       if (file == null) {
         throw new Error(`No file named ${name}`)
       }

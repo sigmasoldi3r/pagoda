@@ -2,7 +2,7 @@ import { Navigate, useParams } from 'react-router-dom'
 import RomDetail from '../components/RomDetail'
 
 /** ROM Details menu. */
-export default function RomDetails() {
+export default function RomDetailRoute() {
   const params = useParams()
   const id = Number(params.id)
   if (params.id == null || Number.isNaN(id)) {

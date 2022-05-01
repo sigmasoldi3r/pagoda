@@ -14,6 +14,13 @@ The main features are:
 - Interactive actions.
 - A custom scripting language, that is designed to resemble a script.
 
+## Language and usage
+
+You can check out the [manual (aka user guide) page](https://sigmasoldi3r.github.io/pagoda/#manual).
+
+Is currently being built, so expect to have almost everything
+missing for now.
+
 ## Showcase
 
 \*Note: Everything is still under active development, this readme will be updated soon.
@@ -29,4 +36,3 @@ The current main menu:
 Running game example (A simple builtin hello world-like game that I'm working on):
 
 ![image](https://user-images.githubusercontent.com/13834659/165315883-03d43225-f083-4b22-b3d3-ace750443608.png)
-

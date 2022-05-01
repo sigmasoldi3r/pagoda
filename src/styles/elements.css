@@ -161,6 +161,23 @@ ul {
     rgb(255, 255, 255) 2.88051px -0.838247px 0px;
 }
 
+p {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+p::first-letter {
+  margin-left: 0.5rem;
+}
+div.narration-line p::first-letter,
+div.narration-line p {
+  margin-left: initial;
+  margin-top: initial;
+  margin-bottom: initial;
+}
+div.narration-line p:first-of-type {
+  display: inline;
+}
+
 /* Misc */
 ::-webkit-scrollbar {
   width: 8px;

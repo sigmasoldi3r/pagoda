@@ -6,107 +6,114 @@ import Markdown from 'react-markdown'
 import gfm from 'remark-gfm'
 import { useNavigate } from 'react-router-dom'
 import ChoiceMenu from './ChoiceMenu'
+import ErrorFormatter from '../ErrorFormatter'
 
 const events = new EventEmitter()
 
-export default function Stage({ rom }: { rom: Rom }) {
-  const navigate = useNavigate()
+export function useNarration() {
   const [narration, narrate] = useState<JSX.Element[]>([])
   const [choice, setChoice] = useState<JSX.Element | null>(null)
-  const [ended, setEnded] = useState(false)
   const [waiting, setWaiting] = useState(false)
+  async function processor(stmt: lib.Statement) {
+    switch (stmt.type) {
+      case 'clear':
+        narrate(s => [])
+        break
+      case 'wait':
+        setWaiting(true)
+        await new Promise(r => events.once('tap', r))
+        setWaiting(false)
+        break
+      case 'dialogue':
+        {
+          const actor = await this.getActor(stmt)
+          const text = await this.getText(stmt)
+          narrate(s => [
+            ...s,
+            <div
+              className="narration-line"
+              style={{ color: '#' + actor.color.toString(16) }}
+            >
+              {actor.name}: {text}
+            </div>,
+          ])
+        }
+        break
+      case 'narration':
+        {
+          const text = await this.getText(stmt)
+          narrate(s => [
+            ...s,
+            <div className="narration-line">
+              {
+                <Markdown
+                  remarkPlugins={[gfm]}
+                  components={{
+                    a(props) {
+                      return <a {...props} target="_blank" rel="self" />
+                    },
+                  }}
+                >
+                  {text}
+                </Markdown>
+              }
+            </div>,
+          ])
+        }
+        break
+      case 'choice':
+        await new Promise<void>(async done => {
+          const title = await this.solve(stmt.title)
+          const options: [lib.ChoiceCase, any][] = []
+          for (const opt of stmt.options) {
+            options.push([opt, await this.solve(opt.match)])
+          }
+          setChoice(
+            <ChoiceMenu
+              key={`__choices_${Date.now()}`}
+              title={title}
+              def={stmt}
+              rt={this}
+              options={options}
+              done={done}
+            />
+          )
+        })
+        setChoice(null)
+        break
+    }
+    return stmt
+  }
+  return [
+    narration,
+    waiting,
+    choice,
+    processor,
+    narrate,
+    setWaiting,
+    setChoice,
+  ] as const
+}
+
+export default function Stage({ rom }: { rom: Rom }) {
+  const navigate = useNavigate()
+  const [ended, setEnded] = useState(false)
+  const [narration, waiting, choice, processor, narrate] = useNarration()
   useEffect(() => {
-    const rt = new lib.Runtime(async function (stmt) {
-      switch (stmt.type) {
-        case 'clear':
-          narrate(s => [])
-          break
-        case 'wait':
-          setWaiting(true)
-          await new Promise(r => events.once('tap', r))
-          setWaiting(false)
-          break
-        case 'dialogue':
-          {
-            const actor = await this.getActor(stmt)
-            const text = await this.getText(stmt)
-            narrate(s => [
-              ...s,
-              <div
-                className="narration-line"
-                style={{ color: '#' + actor.color.toString(16) }}
-              >
-                {actor.name}: {text}
-              </div>,
-            ])
-          }
-          break
-        case 'narration':
-          {
-            const text = await this.getText(stmt)
-            narrate(s => [
-              ...s,
-              <div className="narration-line">
-                {
-                  <Markdown
-                    remarkPlugins={[gfm]}
-                    components={{
-                      a(props) {
-                        return <a {...props} target="_blank" rel="self" />
-                      },
-                    }}
-                  >
-                    {text}
-                  </Markdown>
-                }
-              </div>,
-            ])
-          }
-          break
-        case 'choice':
-          await new Promise<void>(async done => {
-            const title = await this.solve(stmt.title)
-            const options: [lib.ChoiceCase, any][] = []
-            for (const opt of stmt.options) {
-              options.push([opt, await this.solve(opt.match)])
-            }
-            setChoice(
-              <ChoiceMenu
-                key={`__choices_${Date.now()}`}
-                title={title}
-                def={stmt}
-                rt={this}
-                options={options}
-                done={done}
-              />
-            )
-          })
-          setChoice(null)
-          break
-      }
-      return stmt
-    })
+    const rt = new lib.Runtime(processor)
     const result = rom.getScript('init')
     if (result.success()) {
       rt.start(result.value).then(() => {
         setEnded(true)
       })
     } else {
-      const text = rom.scripts[rom.meta.entry ?? 'init']
+      const source = rom.meta.entry ?? 'init'
+      const text = rom.scripts[source]
       const err = result.error as any
       console.error(err, rom)
       narrate(s => [
         ...s,
-        <div style={{ color: 'red' }}>
-          <h2>Fatal Error</h2>
-          <pre>
-            {err.format
-              ? (result.error as any).format([
-                  { source: rom.meta.entry ?? 'init', text },
-                ])
-              : err.message}
-          </pre>
-        </div>,
+        <ErrorFormatter err={err} source={source} text={text} />,
       ])
       setEnded(true)
     }

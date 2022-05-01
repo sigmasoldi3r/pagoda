@@ -1,10 +1,18 @@
 /*
-  Some builtin ROMs, generated from build script at Fri Apr 29 2022 13:20:58 GMT+0200 (hora de verano de Europa central)
+  Some builtin ROMs, generated from build script at Sun May 01 2022 15:12:03 GMT+0200 (hora de verano de Europa central)
 */
 import { Rom } from './lib/storage/Rom'
 
 export const Survivors = new Rom()
-Survivors.meta = {"name":"Survivors","author":"sigmasoldi3r","desc":"A survival game in natural environments","site":"http://github.com/sigmasoldi3r","version":"1.0.0","extra":{"test":"Yay! I'm a test variable!"},"manifest":{"storage":"save"}}
+Survivors.meta = {
+  name: 'Survivors',
+  author: 'sigmasoldi3r',
+  desc: 'A survival game in natural environments',
+  site: 'http://github.com/sigmasoldi3r',
+  version: '1.0.0',
+  extra: { test: "Yay! I'm a test variable!" },
+  manifest: { storage: 'save' },
+}
 Survivors.scripts['init'] = `###
 # Example project: Survivors
 # A simple survival game about wandering in
@@ -127,5 +135,3 @@ section riverActions {
 # This is the entry point!
 call riverActions
 `
-
-

@@ -427,6 +427,7 @@ export type Statement =
   | Dialogue
   | Narration
   | CharacterDeclaration
+  | WaitStatement
   | Monoid
 
 export interface CharacterDeclaration extends Node<'character'> {
@@ -473,7 +474,11 @@ export interface Return extends Node<'return'> {
   value: Expression
 }
 
-export type Monoid = Node<'clear' | 'end' | 'wait'>
+export interface WaitStatement extends Node<'wait'> {
+  when?: 'never' | 'always' | 'character' | 'narrator' | 'choice'
+}
+
+export type Monoid = Node<'clear' | 'end'>
 
 export interface ChoiceCase extends Node<'case'> {
   match: Str | Name

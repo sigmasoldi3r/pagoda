@@ -25,6 +25,7 @@ program = statements:(_? @(statement /*/ pragma*/) _?)* _? {
 // --------- STATEMENTS --------- //
 statement
   = section
+  / waitStatement
   / monoid
   / ifCase
   / character
@@ -115,7 +116,13 @@ returnStatement = 'return' _? value:expression {
   }
 }
 
-monoid = type:('clear' / 'end' / 'wait' / 'repeat') {
+waitStatement = 'wait' when:(_ @('always' / 'never' / 'character' / 'narrator' / 'choice'))? {
+  return {
+    type: 'wait', when
+  }
+}
+
+monoid = type:('clear' / 'end' / 'repeat') {
   return {
     type
   }
@@ -206,8 +213,8 @@ exprList = e:expression t:(SEP @expression)* { return [e, ...t] }
 
 // --------- ATOMS --------- //
 
-tuple "tuple" = '[' _? elements:exprList _? ']' {
-  return Tuple(elements) 
+tuple "tuple" = '[' _? elements:exprList? _? ']' {
+  return Tuple(elements ?? []) 
 }
 
 random "random expression"
@@ -258,6 +265,7 @@ number
   / '3rd' { return MakeNumber('2') }
   / '0th' { throw new SyntaxError('Can\'t have a ordinal 0th number') }
   / n:$([0-9]+) 'th' { return MakeNumber(Number(n)-1) }
+  / n:$([0-9]+('.'[0-9]+)?) '%' { return MakeNumber(Number(n) / 100) }
   / n:$([0-9]+('.'[0-9]+)?) { return MakeNumber(n) }
   / expr:exprWrap 'th' { return MakeBinary(expr, '-', MakeNumber('1')) }
 
@@ -270,7 +278,7 @@ boolean = b:BOOLEAN {
 }
 
 // - Existential types - //
-nothing = ('nothing' / '[]' / 'void' / 'nil' / 'null' / 'emtpy') { return { type: 'unit' } }
+nothing = ('nothing' / 'void' / 'nil' / 'null' / 'emtpy') { return { type: 'unit' } }
 invalid = 'invalid' { return { type: 'invalid' } }
 
 // -- OPERATORS -- //

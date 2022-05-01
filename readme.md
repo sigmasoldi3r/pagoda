@@ -16,7 +16,7 @@ The main features are:
 
 ## Language and usage
 
-You can check out the [manual (aka user guide) page](https://sigmasoldi3r.github.io/pagoda/#manual).
+You can check out the [manual (aka user guide) page](https://sigmasoldi3r.github.io/pagoda/#/manual).
 
 Is currently being built, so expect to have almost everything
 missing for now.

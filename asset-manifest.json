@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "https://sigmasoldi3r.github.io/pagoda/static/css/main.f712869b.css",
-    "main.js": "https://sigmasoldi3r.github.io/pagoda/static/js/main.7b2a02af.js",
+    "main.css": "https://sigmasoldi3r.github.io/pagoda/static/css/main.069ca695.css",
+    "main.js": "https://sigmasoldi3r.github.io/pagoda/static/js/main.ae8296cc.js",
     "static/js/312.5b3fff4e.chunk.js": "https://sigmasoldi3r.github.io/pagoda/static/js/312.5b3fff4e.chunk.js",
     "static/js/4877.d5a2d36c.chunk.js": "https://sigmasoldi3r.github.io/pagoda/static/js/4877.d5a2d36c.chunk.js",
     "static/js/1074.8d7d1640.chunk.js": "https://sigmasoldi3r.github.io/pagoda/static/js/1074.8d7d1640.chunk.js",
@@ -90,8 +90,8 @@
     "static/media/prstart.ttf": "https://sigmasoldi3r.github.io/pagoda/static/media/prstart.f22a5be077b22a25731a.ttf",
     "static/media/dpcomic.ttf": "https://sigmasoldi3r.github.io/pagoda/static/media/dpcomic.d7850454ee2ba505e533.ttf",
     "index.html": "https://sigmasoldi3r.github.io/pagoda/index.html",
-    "main.f712869b.css.map": "https://sigmasoldi3r.github.io/pagoda/static/css/main.f712869b.css.map",
-    "main.7b2a02af.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/main.7b2a02af.js.map",
+    "main.069ca695.css.map": "https://sigmasoldi3r.github.io/pagoda/static/css/main.069ca695.css.map",
+    "main.ae8296cc.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/main.ae8296cc.js.map",
     "312.5b3fff4e.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/312.5b3fff4e.chunk.js.map",
     "4877.d5a2d36c.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/4877.d5a2d36c.chunk.js.map",
     "1074.8d7d1640.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/1074.8d7d1640.chunk.js.map",
@@ -176,7 +176,7 @@
     "9377.1d9908d3.chunk.js.map": "https://sigmasoldi3r.github.io/pagoda/static/js/9377.1d9908d3.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f712869b.css",
-    "static/js/main.7b2a02af.js"
+    "static/css/main.069ca695.css",
+    "static/js/main.ae8296cc.js"
   ]
 }

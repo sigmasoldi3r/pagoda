@@ -71,6 +71,7 @@ export default function Code({ lang, src }: CodeProps) {
   }, [])
   return (
     <div
+      className="code"
       style={{
         maxWidth: '100vw',
         wordWrap: 'break-word',
@@ -89,7 +90,12 @@ export default function Code({ lang, src }: CodeProps) {
       </pre>
       <hr />
       <small>Output:</small>
-      <code style={{ wordWrap: 'break-word', maxWidth: '100%' }}>{out}</code>
+      <code
+        className="stage"
+        style={{ wordWrap: 'break-word', maxWidth: '100%' }}
+      >
+        {out}
+      </code>
     </div>
   )
 }

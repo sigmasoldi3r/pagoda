@@ -122,7 +122,7 @@ which is 100% the same, but if you don't have any space in your
 text, you can use : to avoid quoting. This is totally optional,
 you can stick to "..." always.
 
-### Dialogues and flow
+### Dialogues and basic flow
 
 You might want to set the player to tap the screen in order to
 continue, you shall use the **wait** keyword:
@@ -162,7 +162,85 @@ wait
 wait
 ~~~
 
-    `}
+In pagoda, **Characters** might have assigned colors for their
+names, and even expressions. This is achieved by declaring
+them, and storing them in variables:
+
+~~~pagoda
+character "You" as y
+
+y "_Something is off..._"
+y "Yikes!"
+"Oh boy!
+The floor is **shaking**!"
+~~~
+
+We'll cover the details of how characters can be tweaked to
+store expressions, poses, states and colors in detail later on,
+in the advanced section.
+
+For now, just let's say that declaring characters will make
+your game script less repetitive and less bloated.
+
+### Variables
+
+When it comes to making the script to remember something,
+you might want to use what we call **variables**.
+
+Basically, a variable is just a value that you have stored
+along with a name, in order to read and modify it later.
+
+Let's imagine that you want to store the health of your
+main character, starting from 100 for instance:
+
+~~~pagoda
+set health to 100
+~~~
+
+That's it! You have set a variable called **health** to
+the value of _100_! Easy right?
+
+Then, you can make use of it later:
+
+~~~pagoda
+set health to 100
+"The player's health
+is now $health"
+~~~
+
+With the dollar sign inside a quoted string, you can read
+the value of those variables, and put them into text.
+
+If you want, you can modify the variable and even perform
+arithmetic on it's value:
+
+~~~pagoda
+set health to health - 1
+~~~
+
+Here what we're saying is: set my variable named "health" to
+the value of subtracting 1 to a variable named "health" (Which is
+itself, in this case).
+
+This means that if we start with a value of _100_, then when
+we arrive to this statement, it evaluates that health must now
+be 100 - 1 (99), because _"health"_ was 100 at that moment.
+
+As said, you can perform all sort of arithmetics:
+
+~~~pagoda
+set bigBrain
+to 1 * 2 + 3 / 4
+# ^ notice that we
+# can split the
+# statement. In this
+# case for readability.
+# Usually you shouldn't.
+"My big brain math
+is $bigBrain"
+~~~
+
+`}
       </Markdown>
     </div>
   )

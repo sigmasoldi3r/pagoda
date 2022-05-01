@@ -177,6 +177,9 @@ div.narration-line p {
 div.narration-line p:first-of-type {
   display: inline;
 }
+div.code pre.language-pagoda {
+  padding: 0.25rem;
+}
 
 /* Misc */
 ::-webkit-scrollbar {
